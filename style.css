@@ -1,0 +1,26 @@
+body{
+ background:#020617;
+ color:#00ffff;
+ font-family:Consolas;
+ text-align:center;
+}
+
+.timer{
+ display:flex;
+ gap:10px;
+ margin:10px;
+ align-items:center;
+ justify-content:center;
+}
+
+.progress{
+ width:200px;
+ height:10px;
+ background:#111;
+}
+
+.bar{
+ height:10px;
+ background:#00ffff;
+ width:0%;
+}
