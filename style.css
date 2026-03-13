@@ -1,8 +1,15 @@
-body{
- background:#020617;
- color:#00ffff;
- font-family:Consolas;
- text-align:center;
+.hidden{
+ display:none;
+}
+
+#configPanel{
+ position:fixed;
+ top:50%;
+ left:50%;
+ transform:translate(-50%,-50%);
+ background:#111;
+ padding:20px;
+ border:1px solid #00ffff;
 }
 
 .timer{
