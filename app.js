@@ -19,11 +19,18 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 /* =========================
-CONFIG LOCAL
+LOCAL CONFIG (HOTKEYS)
 ========================= */
 
-let config = JSON.parse(localStorage.getItem("timertracker")) || {
- hotkeys:["f5","f6","f7","f8"],
+let localData = JSON.parse(localStorage.getItem("timertracker")) || {
+ hotkeys:["f5","f6","f7","f8"]
+}
+
+/* =========================
+GLOBAL CONFIG (TIMERS)
+========================= */
+
+let config = {
  timers:[
   {nome:"Timer 1",tempo:8},
   {nome:"Timer 2",tempo:30},
@@ -34,12 +41,50 @@ let config = JSON.parse(localStorage.getItem("timertracker")) || {
 
 let intervals=[null,null,null,null]
 
-function save(){
- localStorage.setItem("timertracker",JSON.stringify(config))
+/* =========================
+SAVE LOCAL HOTKEYS
+========================= */
+
+function saveLocal(){
+
+ localStorage.setItem("timertracker",JSON.stringify(localData))
+
 }
 
 /* =========================
-CRIAR TIMERS UI
+SAVE GLOBAL TIMERS
+========================= */
+
+function saveGlobal(){
+
+ set(ref(db,"config/timers"),config.timers)
+
+}
+
+/* =========================
+LOAD CONFIG FROM FIREBASE
+========================= */
+
+function loadConfig(){
+
+ const configRef = ref(db,"config/timers")
+
+ onValue(configRef,(snapshot)=>{
+
+  let data=snapshot.val()
+
+  if(!data) return
+
+  config.timers=data
+
+  createTimers()
+
+ })
+
+}
+
+/* =========================
+CREATE TIMER UI
 ========================= */
 
 function createTimers(){
@@ -69,7 +114,7 @@ function createTimers(){
   let btn=document.createElement("button")
   btn.textContent="Start"
 
-  btn.onclick=()=>toggleTimer(i,label,bar,btn)
+  btn.onclick=()=>toggleTimer(i)
 
   div.append(name,label,progress,btn)
 
@@ -83,7 +128,9 @@ function createTimers(){
 START / STOP TIMER
 ========================= */
 
-function toggleTimer(i,label,bar,btn){
+function toggleTimer(i){
+
+ let btn=document.querySelectorAll(".timer button")[i]
 
  if(intervals[i]){
 
@@ -91,19 +138,17 @@ function toggleTimer(i,label,bar,btn){
   intervals[i]=null
 
   btn.textContent="Start"
-  label.textContent="00:00"
-  bar.style.width="0%"
 
- }else{
-
-  startTimer(i)
+  return
 
  }
+
+ startTimer(i)
 
 }
 
 /* =========================
-INICIAR TIMER GLOBAL
+START GLOBAL TIMER
 ========================= */
 
 function startTimer(i){
@@ -111,14 +156,14 @@ function startTimer(i){
  let total=config.timers[i].tempo*60
 
  set(ref(db,"timers/"+i),{
- start:Date.now(),
- tempo:total
+  start:Date.now(),
+  tempo:total
  })
 
 }
 
 /* =========================
-SINCRONIZAR TIMER GLOBAL
+SYNC TIMERS
 ========================= */
 
 function syncTimers(){
@@ -142,7 +187,7 @@ function syncTimers(){
 }
 
 /* =========================
-EXECUTAR TIMER
+RUN TIMER
 ========================= */
 
 function runTimer(i,data){
@@ -187,14 +232,14 @@ function runTimer(i,data){
 }
 
 /* =========================
-HOTKEYS
+HOTKEYS LOCAL
 ========================= */
 
 document.addEventListener("keydown",(e)=>{
 
  let key=e.key.toLowerCase()
 
- config.hotkeys.forEach((hk,i)=>{
+ localData.hotkeys.forEach((hk,i)=>{
 
   if(key===hk){
 
@@ -236,7 +281,7 @@ function renderConfig(){
   tempo.style.width="50px"
 
   let key=document.createElement("input")
-  key.value=config.hotkeys[i]
+  key.value=localData.hotkeys[i]
   key.style.width="60px"
 
   row.append(nome,tempo,key)
@@ -246,6 +291,10 @@ function renderConfig(){
  })
 
 }
+
+/* =========================
+SAVE CONFIG
+========================= */
 
 document.getElementById("saveConfig").onclick=()=>{
 
@@ -257,13 +306,13 @@ document.getElementById("saveConfig").onclick=()=>{
 
   config.timers[i].nome=inputs[0].value
   config.timers[i].tempo=parseFloat(inputs[1].value)
-  config.hotkeys[i]=inputs[2].value.toLowerCase()
+
+  localData.hotkeys[i]=inputs[2].value.toLowerCase()
 
  })
 
- save()
-
- createTimers()
+ saveLocal()
+ saveGlobal()
 
  alert("Configuração salva")
 
@@ -274,4 +323,5 @@ INIT
 ========================= */
 
 createTimers()
+loadConfig()
 syncTimers()
