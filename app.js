@@ -19,16 +19,12 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 /* =========================
-LOCAL CONFIG (HOTKEYS)
+LOCAL CONFIG
 ========================= */
 
 let localData = JSON.parse(localStorage.getItem("timertracker")) || {
  hotkeys:["f5","f6","f7","f8"]
 }
-
-/* =========================
-GLOBAL CONFIG (TIMERS)
-========================= */
 
 let config = {
  timers:[
@@ -58,7 +54,7 @@ function saveGlobal(){
 }
 
 /* =========================
-LOAD CONFIG FROM FIREBASE
+LOAD CONFIG
 ========================= */
 
 function loadConfig(){
@@ -121,30 +117,14 @@ function createTimers(){
 }
 
 /* =========================
-START / STOP TIMER
+START / STOP
 ========================= */
 
 function toggleTimer(i){
 
- let btn=document.querySelectorAll(".timer button")[i]
-
  if(intervals[i]){
 
-  clearInterval(intervals[i])
-  intervals[i]=null
-
-  btn.textContent="Start"
-
-  // remove timer da database
-  remove(ref(db,"timers/"+i))
-
-  // reset visual
-  let label=document.querySelectorAll(".timer span")[i*2+1]
-  let bar=document.querySelectorAll(".bar")[i]
-
-  label.textContent="00:00"
-  bar.style.width="0%"
-
+  stopTimer(i)
   return
 
  }
@@ -154,7 +134,7 @@ function toggleTimer(i){
 }
 
 /* =========================
-START GLOBAL TIMER
+START TIMER
 ========================= */
 
 function startTimer(i){
@@ -165,6 +145,29 @@ function startTimer(i){
   start:Date.now(),
   tempo:total
  })
+
+}
+
+/* =========================
+STOP TIMER
+========================= */
+
+function stopTimer(i){
+
+ let label=document.querySelectorAll(".timer span")[i*2+1]
+ let bar=document.querySelectorAll(".bar")[i]
+ let btn=document.querySelectorAll(".timer button")[i]
+
+ clearInterval(intervals[i])
+ intervals[i]=null
+
+ label.textContent="00:00"
+ bar.style.width="0%"
+
+ btn.textContent="Start"
+
+ // REMOVE do Firebase
+ remove(ref(db,"timers/"+i))
 
 }
 
@@ -242,10 +245,7 @@ function runTimer(i,data){
 
   if(remaining<=0){
 
-   clearInterval(intervals[i])
-   intervals[i]=null
-
-   btn.textContent="Start"
+   stopTimer(i)
 
   }
 
@@ -254,7 +254,7 @@ function runTimer(i,data){
 }
 
 /* =========================
-HOTKEYS LOCAL
+HOTKEYS
 ========================= */
 
 document.addEventListener("keydown",(e)=>{
@@ -314,10 +314,6 @@ function renderConfig(){
 
 }
 
-/* =========================
-SAVE CONFIG
-========================= */
-
 document.getElementById("saveConfig").onclick=()=>{
 
  let rows=document.querySelectorAll("#configTimers div")
@@ -335,20 +331,6 @@ document.getElementById("saveConfig").onclick=()=>{
 
  saveLocal()
  saveGlobal()
-
- intervals.forEach((t,i)=>{
-  if(t){
-   clearInterval(intervals[i])
-   intervals[i]=null
-  }
- })
-
- setTimeout(()=>{
-
-  createTimers()
-  syncTimers()
-
- },300)
 
  alert("Configuração salva")
 
