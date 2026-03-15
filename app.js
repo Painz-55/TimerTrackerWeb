@@ -26,10 +26,6 @@ let localData = JSON.parse(localStorage.getItem("timertracker")) || {
  hotkeys:["f5","f6","f7","f8"]
 };
 
-/* =========================
-GLOBAL CONFIG
-========================= */
-
 let config = {
  timers:[
   {nome:"Timer 1",tempo:8},
@@ -73,7 +69,19 @@ function loadConfig(){
 
   config.timers=data;
 
-  createTimers();
+  const timerNames=document.querySelectorAll(".timer span:first-child");
+
+  if(timerNames.length){
+
+   config.timers.forEach((t,i)=>{
+    if(timerNames[i]) timerNames[i].textContent=t.nome;
+   });
+
+  }else{
+
+   createTimers();
+
+  }
 
  });
 
@@ -166,7 +174,6 @@ function stopTimer(i){
  bar.style.width="0%";
  btn.textContent="Start";
 
- // remove timer global
  set(ref(db,"timers/"+i), null);
 
 }
@@ -194,9 +201,11 @@ function syncTimers(){
     clearInterval(intervals[i]);
     intervals[i]=null;
 
-    label.textContent="00:00";
-    bar.style.width="0%";
-    btn.textContent="Start";
+    if(label){
+     label.textContent="00:00";
+     bar.style.width="0%";
+     btn.textContent="Start";
+    }
 
     return;
 
