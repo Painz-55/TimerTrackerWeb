@@ -1,3 +1,27 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+/* =========================
+FIREBASE CONFIG
+========================= */
+
+const firebaseConfig = {
+ apiKey: "SUA_API_KEY",
+ authDomain: "SEU_AUTH_DOMAIN",
+ databaseURL: "SEU_DATABASE_URL",
+ projectId: "SEU_PROJECT_ID",
+ storageBucket: "SEU_BUCKET",
+ messagingSenderId: "SEU_ID",
+ appId: "SEU_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+/* =========================
+CONFIG LOCAL
+========================= */
+
 let config = JSON.parse(localStorage.getItem("timertracker")) || {
  hotkeys:["f5","f6","f7","f8"],
  timers:[
@@ -13,6 +37,10 @@ let intervals=[null,null,null,null]
 function save(){
  localStorage.setItem("timertracker",JSON.stringify(config))
 }
+
+/* =========================
+CRIAR TIMERS UI
+========================= */
 
 function createTimers(){
 
@@ -51,6 +79,10 @@ function createTimers(){
 
 }
 
+/* =========================
+START / STOP TIMER
+========================= */
+
 function toggleTimer(i,label,bar,btn){
 
  if(intervals[i]){
@@ -64,22 +96,71 @@ function toggleTimer(i,label,bar,btn){
 
  }else{
 
-  startTimer(i,label,bar,btn)
+  startTimer(i)
 
  }
 
 }
 
-function startTimer(i,label,bar,btn){
+/* =========================
+INICIAR TIMER GLOBAL
+========================= */
+
+function startTimer(i){
 
  let total=config.timers[i].tempo*60
- let remaining=total
 
- btn.textContent="Stop"
+ set(ref(db,"timers/"+i),{
+ start:Date.now(),
+ tempo:total
+ })
+
+}
+
+/* =========================
+SINCRONIZAR TIMER GLOBAL
+========================= */
+
+function syncTimers(){
+
+ config.timers.forEach((t,i)=>{
+
+  const timerRef=ref(db,"timers/"+i)
+
+  onValue(timerRef,(snapshot)=>{
+
+   let data=snapshot.val()
+
+   if(!data) return
+
+   runTimer(i,data)
+
+  })
+
+ })
+
+}
+
+/* =========================
+EXECUTAR TIMER
+========================= */
+
+function runTimer(i,data){
+
+ let label=document.querySelectorAll(".timer span")[i*2+1]
+ let bar=document.querySelectorAll(".bar")[i]
+ let btn=document.querySelectorAll(".timer button")[i]
+
+ let total=data.tempo
+
+ clearInterval(intervals[i])
 
  intervals[i]=setInterval(()=>{
 
-  remaining--
+  let elapsed=(Date.now()-data.start)/1000
+  let remaining=Math.floor(total-elapsed)
+
+  if(remaining<0) remaining=0
 
   let m=Math.floor(remaining/60)
   let s=remaining%60
@@ -90,6 +171,8 @@ function startTimer(i,label,bar,btn){
 
   bar.style.width=((total-remaining)/total*100)+"%"
 
+  btn.textContent="Stop"
+
   if(remaining<=0){
 
    clearInterval(intervals[i])
@@ -97,13 +180,15 @@ function startTimer(i,label,bar,btn){
 
    btn.textContent="Start"
 
-   alert("Timer terminou")
-
   }
 
  },1000)
 
 }
+
+/* =========================
+HOTKEYS
+========================= */
 
 document.addEventListener("keydown",(e)=>{
 
@@ -120,6 +205,10 @@ document.addEventListener("keydown",(e)=>{
  })
 
 })
+
+/* =========================
+CONFIG PANEL
+========================= */
 
 document.getElementById("configBtn").onclick=()=>{
 
@@ -180,4 +269,9 @@ document.getElementById("saveConfig").onclick=()=>{
 
 }
 
+/* =========================
+INIT
+========================= */
+
 createTimers()
+syncTimers()
