@@ -6,13 +6,13 @@ FIREBASE CONFIG
 ========================= */
 
 const firebaseConfig = {
- apiKey: "SUA_API_KEY",
- authDomain: "SEU_AUTH_DOMAIN",
- databaseURL: "SEU_DATABASE_URL",
- projectId: "SEU_PROJECT_ID",
- storageBucket: "SEU_BUCKET",
- messagingSenderId: "SEU_ID",
- appId: "SEU_APP_ID"
+ apiKey: "AIzaSyAdCJ_Ux1YrjQdxSgutu_SvqTQTNIDVLUs",
+ authDomain: "timertracker-77df3.firebaseapp.com",
+ databaseURL: "https://timertracker-77df3-default-rtdb.firebaseio.com",
+ projectId: "timertracker-77df3",
+ storageBucket: "timertracker-77df3.firebasestorage.app",
+ messagingSenderId: "1071640359296",
+ appId: "1:1071640359296:web:c02cd908aca9a8547d1165"
 };
 
 const app = initializeApp(firebaseConfig);
