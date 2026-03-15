@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 /* =========================
 FIREBASE CONFIG
@@ -46,9 +46,7 @@ SAVE LOCAL HOTKEYS
 ========================= */
 
 function saveLocal(){
-
  localStorage.setItem("timertracker",JSON.stringify(localData))
-
 }
 
 /* =========================
@@ -56,9 +54,7 @@ SAVE GLOBAL TIMERS
 ========================= */
 
 function saveGlobal(){
-
  set(ref(db,"config/timers"),config.timers)
-
 }
 
 /* =========================
@@ -139,6 +135,16 @@ function toggleTimer(i){
 
   btn.textContent="Start"
 
+  // remove timer da database
+  remove(ref(db,"timers/"+i))
+
+  // reset visual
+  let label=document.querySelectorAll(".timer span")[i*2+1]
+  let bar=document.querySelectorAll(".bar")[i]
+
+  label.textContent="00:00"
+  bar.style.width="0%"
+
   return
 
  }
@@ -176,7 +182,23 @@ function syncTimers(){
 
    let data=snapshot.val()
 
-   if(!data) return
+   let label=document.querySelectorAll(".timer span")[i*2+1]
+   let bar=document.querySelectorAll(".bar")[i]
+   let btn=document.querySelectorAll(".timer button")[i]
+
+   if(!data){
+
+    clearInterval(intervals[i])
+    intervals[i]=null
+
+    label.textContent="00:00"
+    bar.style.width="0%"
+
+    btn.textContent="Start"
+
+    return
+
+   }
 
    runTimer(i,data)
 
@@ -313,6 +335,20 @@ document.getElementById("saveConfig").onclick=()=>{
 
  saveLocal()
  saveGlobal()
+
+ intervals.forEach((t,i)=>{
+  if(t){
+   clearInterval(intervals[i])
+   intervals[i]=null
+  }
+ })
+
+ setTimeout(()=>{
+
+  createTimers()
+  syncTimers()
+
+ },300)
 
  alert("Configuração salva")
 
