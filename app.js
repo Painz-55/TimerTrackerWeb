@@ -209,6 +209,14 @@ START / STOP
 
 function toggleTimer(i){
 
+ stopAlarm()
+
+ let timerDiv=document.querySelectorAll(".timer")[i]
+
+ if(timerDiv){
+  timerDiv.classList.remove("finished")
+ }
+
  if(intervals[i]){
   stopTimer(i)
  }else{
@@ -449,6 +457,17 @@ function playAlarm(){
 
  audio.currentTime=0
  audio.play()
+
+}
+
+function stopAlarm(){
+
+ let audio=document.getElementById("alarmSound")
+
+ if(!audio) return
+
+ audio.pause()
+ audio.currentTime=0
 
 }
 
