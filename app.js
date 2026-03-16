@@ -118,6 +118,10 @@ function createTimers(){
 
   progress.appendChild(bar)
 
+  if(!localData.hotkeys[i]){
+  localData.hotkeys[i]=""
+  }
+  
   let btn=document.createElement("button")
   btn.textContent="Start"
 
@@ -433,6 +437,34 @@ document.getElementById("exitObs").onclick=()=>{
  document.querySelector(".leftPanel").style.width="40%"
 
  document.getElementById("exitObs").classList.add("hidden")
+
+}
+
+/* =========================
+Adicionando/Removendo Timers
+========================= */
+
+
+document.getElementById("addTimer").onclick = ()=>{
+
+ if(config.timers.length >= 8){
+  alert("Máximo de 8 timers atingido")
+  return
+ }
+
+ let index = config.timers.length + 1
+
+ config.timers.push({
+  nome:"Timer "+index,
+  tempo:10
+ })
+
+ localData.hotkeys.push("")
+
+ intervals.push(null)
+
+ saveLocal()
+ saveGlobal()
 
 }
 
