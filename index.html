@@ -1,158 +1,65 @@
-body{
+<!DOCTYPE html>
+<html>
 
-background:#0f0f12;
-color:white;
-font-family:Arial;
-margin:0;
+<head>
 
-}
+<meta charset="UTF-8">
+<title>TimerTracker Dashboard</title>
 
-.dashboard{
+<link rel="stylesheet" href="style.css">
 
-display:flex;
-height:100vh;
+</head>
 
-}
+<body>
 
-/* LEFT */
+<div class="dashboard">
 
-.leftPanel{
+<!-- LEFT PANEL -->
 
-width:40%;
-background:#111;
-display:flex;
-align-items:center;
-justify-content:center;
+<div class="leftPanel">
 
-}
+<div class="mainTimer">
 
-.mainTimer{
+<div id="bigTimer">00:00</div>
+<div id="bigLabel">No Timer Running</div>
 
-text-align:center;
+</div>
 
-}
+</div>
 
-#bigTimer{
 
-font-size:140px;
-font-weight:bold;
-color:#ff4c4c;
+<!-- RIGHT PANEL -->
 
-}
+<div class="rightPanel">
 
-#bigLabel{
+<div class="header">
 
-font-size:22px;
-opacity:.7;
+<h1>Timers</h1>
 
-}
+<button id="configBtn">⚙</button>
 
-/* RIGHT */
+</div>
 
-.rightPanel{
+<div id="timers"></div>
 
-flex:1;
-padding:30px;
-overflow:auto;
+</div>
 
-}
+</div>
 
-.header{
 
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
+<!-- CONFIG PANEL -->
 
-}
+<div id="configPanel" class="hidden">
 
-.timer{
+<h2>Configuração</h2>
 
-background:#1b1b1f;
-padding:20px;
-border-radius:8px;
-margin-bottom:15px;
+<div id="configTimers"></div>
 
-display:flex;
-align-items:center;
-gap:15px;
+<button id="saveConfig">Salvar</button>
 
-}
+</div>
 
-.timer span:first-child{
+<script type="module" src="app.js"></script>
 
-width:150px;
-font-size:18px;
-
-}
-
-.timer span:nth-child(2){
-
-width:70px;
-font-size:18px;
-
-}
-
-.progress{
-
-flex:1;
-height:8px;
-background:#333;
-border-radius:5px;
-overflow:hidden;
-
-}
-
-.bar{
-
-height:100%;
-background:#ff4c4c;
-width:0%;
-
-}
-
-button{
-
-background:#ff4c4c;
-border:none;
-color:white;
-padding:8px 14px;
-border-radius:4px;
-cursor:pointer;
-
-}
-
-button:hover{
-
-background:#ff6b6b;
-
-}
-
-/* CONFIG */
-
-#configPanel{
-
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:#1b1b1f;
-padding:30px;
-border-radius:8px;
-
-}
-
-.hidden{
-
-display:none;
-
-}
-
-input{
-
-background:#111;
-border:1px solid #444;
-color:white;
-padding:5px;
-
-}
+</body>
+</html>
