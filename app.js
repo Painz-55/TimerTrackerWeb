@@ -66,21 +66,15 @@ function loadConfig(){
 
   const data=snapshot.val()
 
-  if(!data) return
-
-  config.timers=data
-
-  const timerNames=document.querySelectorAll(".timer span:first-child")
-
-  if(timerNames.length){
-
-   config.timers.forEach((t,i)=>{
-    if(timerNames[i]) timerNames[i].textContent=t.nome
-   })
-
-  }else{
-   createTimers()
+  if(data){
+   config.timers=data
   }
+
+  // criar timers
+  createTimers()
+
+  // sincronizar apenas depois
+  syncTimers()
 
  })
 
@@ -414,6 +408,4 @@ exitObs.onclick=()=>{
 INIT
 ========================= */
 
-createTimers()
 loadConfig()
-syncTimers()
