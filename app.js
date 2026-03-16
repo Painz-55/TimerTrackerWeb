@@ -571,6 +571,12 @@ document.addEventListener("click",(e)=>{
 
 })
 
+document.getElementById("closeConfig").onclick=()=>{
+
+ document.getElementById("configPanel").classList.add("hidden")
+
+}
+
 /* =========================
 INIT
 ========================= */
