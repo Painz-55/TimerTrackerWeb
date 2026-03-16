@@ -471,6 +471,8 @@ function triggerTimerFinished(i){
 
  playAlarm()
 
+ set(ref(db,"timers/"+i),null)
+
 }
 
 /* =========================
