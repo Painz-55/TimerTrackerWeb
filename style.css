@@ -165,3 +165,17 @@ left:20px;
 z-index:10;
 
 }
+
+@keyframes blinkTimer{
+
+0%{background:#1b1b1f;}
+50%{background:#8b0000;}
+100%{background:#1b1b1f;}
+
+}
+
+.timer.finished{
+
+animation:blinkTimer 1s infinite;
+
+}
