@@ -1,151 +1,65 @@
-body{
-background:#0f0f12;
-color:white;
-font-family:Arial;
-margin:0;
-}
+<!DOCTYPE html>
+<html>
 
-/* DASHBOARD */
+<head>
 
-.dashboard{
-display:flex;
-height:100vh;
-}
+<meta charset="UTF-8">
+<title>TimerTracker Dashboard</title>
 
-/* LEFT PANEL */
+<link rel="stylesheet" href="style.css">
 
-.leftPanel{
-width:40%;
-background:#111;
-display:flex;
-align-items:center;
-justify-content:center;
-}
+</head>
 
-.mainTimer{
-text-align:center;
-}
+<body>
 
-#bigTimer{
-font-size:140px;
-font-weight:bold;
-color:#ff4c4c;
-}
+<div class="dashboard">
 
-#bigLabel{
-font-size:22px;
-opacity:.7;
-}
+<!-- LEFT PANEL -->
 
-/* RIGHT PANEL */
+<div class="leftPanel">
 
-.rightPanel{
-flex:1;
-padding:30px;
-overflow:auto;
-}
+<div class="mainTimer">
 
-/* HEADER */
+<div id="bigTimer">00:00</div>
+<div id="bigLabel">No Timer Running</div>
 
-.header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
-}
+</div>
 
-.headerButtons{
-display:flex;
-gap:10px;
-}
+</div>
 
-/* TIMER LIST */
 
-.timer{
-background:#1b1b1f;
-padding:20px;
-border-radius:8px;
-margin-bottom:15px;
+<!-- RIGHT PANEL -->
 
-display:flex;
-align-items:center;
-gap:15px;
-}
+<div class="rightPanel">
 
-.timer span:first-child{
-width:150px;
-font-size:18px;
-}
+<div class="header">
 
-.timer span:nth-child(2){
-width:70px;
-font-size:18px;
-}
+<h1>Timers</h1>
 
-/* PROGRESS */
+<button id="configBtn">⚙</button>
 
-.progress{
-flex:1;
-height:8px;
-background:#333;
-border-radius:5px;
-overflow:hidden;
-}
+</div>
 
-.bar{
-height:100%;
-background:#ff4c4c;
-width:0%;
-}
+<div id="timers"></div>
 
-/* BUTTONS */
+</div>
 
-button{
-background:#ff4c4c;
-border:none;
-color:white;
-padding:8px 14px;
-border-radius:4px;
-cursor:pointer;
-}
+</div>
 
-button:hover{
-background:#ff6b6b;
-}
 
-/* CONFIG PANEL */
+<!-- CONFIG PANEL -->
 
-#configPanel{
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:#1b1b1f;
-padding:30px;
-border-radius:8px;
-}
+<div id="configPanel" class="hidden">
 
-.hidden{
-display:none;
-}
+<h2>Configuração</h2>
 
-input{
-background:#111;
-border:1px solid #444;
-color:white;
-padding:5px;
-}
+<div id="configTimers"></div>
 
-/* EXIT OBS BUTTON */
+<button id="saveConfig">Salvar</button>
 
-#exitObs{
-position:fixed;
-top:20px;
-right:20px;
-z-index:999;
+</div>
 
-background:#ff4c4c;
-padding:10px 15px;
-border-radius:6px;
-font-size:14px;
-}
+<script type="module" src="app.js"></script>
+
+</body>
+</html>
