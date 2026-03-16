@@ -477,35 +477,30 @@ function renderBossConfig(){
   let del=document.createElement("button")
   del.textContent="❌"
   del.className="deleteBoss"
+  del.dataset.index=i
 
-  del.addEventListener("click",()=>{
+  del.onclick=()=>{
 
-   deleteBoss(i)
+   if(config.bosses.length<=1){
+    alert("Deve existir pelo menos 1 boss.")
+    return
+   }
 
-  })
+   config.bosses.splice(i,1)
+
+   saveConfig()
+
+   renderBossConfig()
+
+   createTimers()
+
+  }
 
   row.append(nome,tempo,del)
 
   div.appendChild(row)
 
  })
-
-}
-
-function deleteBoss(index){
-
- if(config.bosses.length <= 1){
-  alert("Deve existir pelo menos 1 boss.")
-  return
- }
-
- config.bosses.splice(index,1)
-
- saveConfig()
-
- renderBossConfig()
-
- createTimers()
 
 }
 
