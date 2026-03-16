@@ -253,33 +253,47 @@ SYNC TIMERS
 
 function syncTimers(){
 
+ // remover listeners antigos
+ timerListeners.forEach(unsub=>{
+  if(unsub) unsub()
+ })
+
+ timerListeners=[]
+
  config.timers.forEach((t,i)=>{
 
   const timerRef = ref(db,"timers/"+i)
 
-  onValue(timerRef,(snapshot)=>{
+  const unsubscribe = onValue(timerRef,(snapshot)=>{
 
    const data = snapshot.val()
 
+   const label=document.querySelectorAll(".timer span")[i]
+   const bar=document.querySelectorAll(".bar")[i]
    const btn=document.querySelectorAll(".timer button")[i]
+
+   if(!label || !bar || !btn) return
 
    if(data===null){
 
     clearInterval(intervals[i])
     intervals[i]=null
 
-    if(btn) btn.textContent="Start"
-
     delete activeTimers[i]
     updateBigTimer()
 
-    return
+    label.textContent="00:00"
+    bar.style.width="0%"
+    btn.textContent="Start"
 
+    return
    }
 
    runTimer(i,data)
 
   })
+
+  timerListeners.push(unsubscribe)
 
  })
 
