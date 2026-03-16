@@ -71,7 +71,8 @@ function loadConfig(){
   if(!data) return
 
   config.timers=data
-  
+
+  // ajustar tamanho dos intervals
   intervals.length=config.timers.length
 
   const currentTimers=document.querySelectorAll(".timer")
@@ -467,6 +468,35 @@ document.getElementById("addTimer").onclick = ()=>{
  localData.hotkeys.push("")
 
  intervals.push(null)
+
+ saveLocal()
+ saveGlobal()
+
+}
+
+document.getElementById("removeTimer").onclick = ()=>{
+
+ if(config.timers.length <= 1){
+  alert("Mínimo de 1 timer")
+  return
+ }
+
+ let index = config.timers.length - 1
+
+ // parar timer se estiver ativo
+ stopTimer(index)
+
+ // remover do firebase
+ set(ref(db,"timers/"+index), null)
+
+ // remover da config
+ config.timers.pop()
+
+ // remover hotkey
+ localData.hotkeys.pop()
+
+ // remover interval
+ intervals.pop()
 
  saveLocal()
  saveGlobal()
