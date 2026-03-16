@@ -66,7 +66,7 @@ function renderBossConfig(){
   let nome=document.createElement("input")
   nome.value=b.nome
 
-  nome.oninput=()=>{
+  nome.onchange=()=>{
    config.bosses[i].nome=nome.value
    saveConfig()
    updateBossDropdowns()
@@ -77,9 +77,9 @@ function renderBossConfig(){
   tempo.value=b.tempo
   tempo.style.width="60px"
 
-  tempo.oninput=()=>{
-   config.bosses[i].tempo=parseInt(tempo.value)||0
-   saveConfig()
+  tempo.onchange=()=>{
+  config.bosses[i].tempo=parseInt(tempo.value)||0
+  saveConfig()
   }
 
   let del=document.createElement("button")
