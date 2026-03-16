@@ -61,15 +61,41 @@ function renderBossConfig(){
  config.bosses.forEach((b,i)=>{
 
   let row=document.createElement("div")
+  row.className="bossRow"
 
   let nome=document.createElement("input")
   nome.value=b.nome
 
+  nome.oninput=()=>{
+   config.bosses[i].nome=nome.value
+   saveConfig()
+   updateBossDropdowns()
+  }
+
   let tempo=document.createElement("input")
+  tempo.type="number"
   tempo.value=b.tempo
   tempo.style.width="60px"
 
-  row.append(nome,tempo)
+  tempo.oninput=()=>{
+   config.bosses[i].tempo=parseInt(tempo.value)||0
+   saveConfig()
+  }
+
+  let del=document.createElement("button")
+  del.textContent="X"
+
+  del.onclick=(e)=>{
+   e.stopPropagation()
+
+   config.bosses.splice(i,1)
+
+   saveConfig()
+   renderBossConfig()
+   updateBossDropdowns()
+  }
+
+  row.append(nome,tempo,del)
 
   div.appendChild(row)
 
@@ -77,6 +103,43 @@ function renderBossConfig(){
 
 }
 
+function updateBossDropdowns(){
+
+ const selects=document.querySelectorAll(".timer select")
+
+ selects.forEach((select,i)=>{
+
+  const current=config.timers[i]?.bossId ?? 0
+
+  select.innerHTML=""
+
+  config.bosses.forEach((b,index)=>{
+
+   let opt=document.createElement("option")
+   opt.value=index
+   opt.textContent=b.nome
+
+   select.appendChild(opt)
+
+  })
+
+  select.value=current
+
+ })
+
+}
+
+
+document.getElementById("addBoss").onclick=()=>{
+
+ config.bosses.push({
+  nome:"New Boss",
+  tempo:60
+ })
+
+ saveConfig()
+
+}
 
 function loadBosses(){
 
