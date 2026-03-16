@@ -36,8 +36,6 @@ let config = {
 };
 
 let intervals=[null,null,null,null]
-
-/* timers ativos */
 let activeTimers={}
 
 /* =========================
@@ -81,9 +79,7 @@ function loadConfig(){
    })
 
   }else{
-
    createTimers()
-
   }
 
  })
@@ -136,18 +132,12 @@ START / STOP
 ========================= */
 
 function toggleTimer(i){
-
  if(intervals[i]){
   stopTimer(i)
  }else{
   startTimer(i)
  }
-
 }
-
-/* =========================
-START TIMER
-========================= */
 
 function startTimer(i){
 
@@ -159,10 +149,6 @@ function startTimer(i){
  })
 
 }
-
-/* =========================
-STOP TIMER
-========================= */
 
 function stopTimer(i){
 
@@ -217,7 +203,6 @@ function syncTimers(){
     }
 
     return
-
    }
 
    runTimer(i,data)
@@ -268,10 +253,8 @@ function runTimer(i,data){
   updateBigTimer()
 
   if(remaining<=0){
-
    delete activeTimers[i]
    stopTimer(i)
-
   }
 
  },1000)
@@ -290,23 +273,17 @@ function updateBigTimer(){
 
   document.getElementById("bigTimer").textContent="00:00"
   document.getElementById("bigLabel").textContent="No Timer Running"
-
   return
-
  }
 
  let lowest=null
  let index=null
 
  keys.forEach(k=>{
-
   if(lowest===null || activeTimers[k].remaining<lowest){
-
    lowest=activeTimers[k].remaining
    index=k
-
   }
-
  })
 
  let remaining=activeTimers[index].remaining
@@ -332,11 +309,9 @@ document.addEventListener("keydown",(e)=>{
  let key=e.key.toLowerCase()
 
  localData.hotkeys.forEach((hk,i)=>{
-
   if(key===hk){
    document.querySelectorAll(".timer button")[i].click()
   }
-
  })
 
 })
@@ -346,12 +321,9 @@ CONFIG PANEL
 ========================= */
 
 document.getElementById("configBtn").onclick=()=>{
-
  let panel=document.getElementById("configPanel")
  panel.classList.toggle("hidden")
-
  renderConfig()
-
 }
 
 function renderConfig(){
@@ -375,7 +347,6 @@ function renderConfig(){
   key.style.width="60px"
 
   row.append(nome,tempo,key)
-
   div.appendChild(row)
 
  })
@@ -408,12 +379,34 @@ document.getElementById("saveConfig").onclick=()=>{
 OBS MODE
 ========================= */
 
-document.getElementById("obsBtn").onclick=()=>{
+const obsBtn=document.getElementById("obsBtn")
+const exitObs=document.getElementById("exitObs")
+
+obsBtn.onclick=()=>{
 
  document.querySelector(".rightPanel").style.display="none"
- document.querySelector(".header").style.display="none"
 
  document.querySelector(".leftPanel").style.width="100%"
+ document.querySelector(".leftPanel").style.height="100vh"
+
+ document.querySelector("#bigTimer").style.fontSize="220px"
+ document.querySelector("#bigLabel").style.fontSize="40px"
+
+ exitObs.classList.remove("hidden")
+
+}
+
+exitObs.onclick=()=>{
+
+ document.querySelector(".rightPanel").style.display="block"
+
+ document.querySelector(".leftPanel").style.width="40%"
+ document.querySelector(".leftPanel").style.height="auto"
+
+ document.querySelector("#bigTimer").style.fontSize="140px"
+ document.querySelector("#bigLabel").style.fontSize="22px"
+
+ exitObs.classList.add("hidden")
 
 }
 
