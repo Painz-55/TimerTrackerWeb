@@ -463,7 +463,7 @@ TIMER FINISHED
 
 function triggerTimerFinished(i){
 
- clearInterval(intervals[i])
+clearInterval(intervals[i])
  intervals[i]=null
 
  let timerDiv=document.querySelectorAll(".timer")[i]
@@ -473,8 +473,6 @@ function triggerTimerFinished(i){
  }
 
  playAlarm()
-
- set(ref(db,"timers/"+i),null)
 
 }
 
