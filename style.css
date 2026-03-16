@@ -1,65 +1,158 @@
-<!DOCTYPE html>
-<html>
+body{
 
-<head>
+background:#0f0f12;
+color:white;
+font-family:Arial;
+margin:0;
 
-<meta charset="UTF-8">
-<title>TimerTracker Dashboard</title>
+}
 
-<link rel="stylesheet" href="style.css">
+.dashboard{
 
-</head>
+display:flex;
+height:100vh;
 
-<body>
+}
 
-<div class="dashboard">
+/* LEFT */
 
-<!-- LEFT PANEL -->
+.leftPanel{
 
-<div class="leftPanel">
+width:40%;
+background:#111;
+display:flex;
+align-items:center;
+justify-content:center;
 
-<div class="mainTimer">
+}
 
-<div id="bigTimer">00:00</div>
-<div id="bigLabel">No Timer Running</div>
+.mainTimer{
 
-</div>
+text-align:center;
 
-</div>
+}
 
+#bigTimer{
 
-<!-- RIGHT PANEL -->
+font-size:140px;
+font-weight:bold;
+color:#ff4c4c;
 
-<div class="rightPanel">
+}
 
-<div class="header">
+#bigLabel{
 
-<h1>Timers</h1>
+font-size:22px;
+opacity:.7;
 
-<button id="configBtn">⚙</button>
+}
 
-</div>
+/* RIGHT */
 
-<div id="timers"></div>
+.rightPanel{
 
-</div>
+flex:1;
+padding:30px;
+overflow:auto;
 
-</div>
+}
 
+.header{
 
-<!-- CONFIG PANEL -->
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
 
-<div id="configPanel" class="hidden">
+}
 
-<h2>Configuração</h2>
+.timer{
 
-<div id="configTimers"></div>
+background:#1b1b1f;
+padding:20px;
+border-radius:8px;
+margin-bottom:15px;
 
-<button id="saveConfig">Salvar</button>
+display:flex;
+align-items:center;
+gap:15px;
 
-</div>
+}
 
-<script type="module" src="app.js"></script>
+.timer span:first-child{
 
-</body>
-</html>
+width:150px;
+font-size:18px;
+
+}
+
+.timer span:nth-child(2){
+
+width:70px;
+font-size:18px;
+
+}
+
+.progress{
+
+flex:1;
+height:8px;
+background:#333;
+border-radius:5px;
+overflow:hidden;
+
+}
+
+.bar{
+
+height:100%;
+background:#ff4c4c;
+width:0%;
+
+}
+
+button{
+
+background:#ff4c4c;
+border:none;
+color:white;
+padding:8px 14px;
+border-radius:4px;
+cursor:pointer;
+
+}
+
+button:hover{
+
+background:#ff6b6b;
+
+}
+
+/* CONFIG */
+
+#configPanel{
+
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:#1b1b1f;
+padding:30px;
+border-radius:8px;
+
+}
+
+.hidden{
+
+display:none;
+
+}
+
+input{
+
+background:#111;
+border:1px solid #444;
+color:white;
+padding:5px;
+
+}
