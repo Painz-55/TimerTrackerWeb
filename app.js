@@ -71,6 +71,8 @@ function loadConfig(){
   if(!data) return
 
   config.timers=data
+  
+  intervals.length=config.timers.length
 
   const currentTimers=document.querySelectorAll(".timer")
 
