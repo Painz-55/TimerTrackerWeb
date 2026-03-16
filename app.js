@@ -6,6 +6,7 @@ FIREBASE
 ========================= */
 
 const firebaseConfig = {
+
  apiKey: "AIzaSyAdCJ_Ux1YrjQdxSgutu_SvqTQTNIDVLUs",
  authDomain: "timertracker-77df3.firebaseapp.com",
  databaseURL: "https://timertracker-77df3-default-rtdb.firebaseio.com",
@@ -13,52 +14,54 @@ const firebaseConfig = {
  storageBucket: "timertracker-77df3.firebasestorage.app",
  messagingSenderId: "1071640359296",
  appId: "1:1071640359296:web:c02cd908aca9a8547d1165"
+
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 /* =========================
-LOCAL DATA
+DATA
 ========================= */
 
-let localData = JSON.parse(localStorage.getItem("timertracker")) || {
- hotkeys:["f5","f6","f7","f8"]
-};
-
-let config = {
+let config={
  timers:[],
  bosses:[]
 }
 
-let intervals=[null,null,null,null]
-
-/* timers ativos */
+let intervals=[]
 let activeTimers={}
 
 /* =========================
-SAVE LOCAL
+LOAD BOSSES
 ========================= */
 
-function saveLocal(){
- localStorage.setItem("timertracker",JSON.stringify(localData))
+function loadBosses(){
+
+ const bossRef=ref(db,"config/bosses")
+
+ onValue(bossRef,(snapshot)=>{
+
+  const data=snapshot.val()
+
+  if(!data) return
+
+  config.bosses=data
+
+  updateBossDropdowns()
+  renderBossConfig()
+
+ })
+
 }
 
 /* =========================
-SAVE GLOBAL
-========================= */
-
-function saveGlobal(){
- set(ref(db,"config/timers"),config.timers)
-}
-
-/* =========================
-LOAD CONFIG
+LOAD TIMERS CONFIG
 ========================= */
 
 function loadConfig(){
 
- const configRef = ref(db,"config/timers")
+ const configRef=ref(db,"config/timers")
 
  onValue(configRef,(snapshot)=>{
 
@@ -68,82 +71,27 @@ function loadConfig(){
 
   config.timers=data
 
-  // ajustar tamanho dos intervals
   intervals.length=config.timers.length
 
-  const currentTimers=document.querySelectorAll(".timer")
-
-  if(currentTimers.length !== config.timers.length){
-
-   createTimers()
-   syncTimers()
-
-  }else{
-
-   const timerNames=document.querySelectorAll(".timer span:first-child")
-
-   config.timers.forEach((t,i)=>{
-    if(timerNames[i]) timerNames[i].textContent=t.nome
-   })
-
-  }
+  createTimers()
+  syncTimers()
 
  })
 
 }
 
 /* =========================
-LoadBoss
+SAVE GLOBAL
 ========================= */
 
-function loadBosses(){
+function saveGlobal(){
 
- const bossRef = ref(db,"config/bosses")
-
- onValue(bossRef,(snapshot)=>{
-
-  const data = snapshot.val()
-
-  if(!data) return
-
-  config.bosses = data
-
-  updateBossDropdowns()
-
- })
+ set(ref(db,"config/timers"),config.timers)
 
 }
 
 /* =========================
-Render Boss
-========================= */
-
-function renderBossConfig(){
-
- let div=document.getElementById("bossConfig")
- div.innerHTML=""
-
- config.bosses.forEach((b,i)=>{
-
-  let row=document.createElement("div")
-
-  let nome=document.createElement("input")
-  nome.value=b.nome
-
-  let tempo=document.createElement("input")
-  tempo.value=b.tempo
-  tempo.style.width="60px"
-
-  row.append(nome,tempo)
-
-  div.appendChild(row)
-
- })
-
-}
-
-/* =========================
-CREATE UI
+CREATE TIMERS UI
 ========================= */
 
 function createTimers(){
@@ -156,28 +104,27 @@ function createTimers(){
   let div=document.createElement("div")
   div.className="timer"
 
-let select=document.createElement("select")
+  let select=document.createElement("select")
 
-config.bosses.forEach((boss,i)=>{
+  config.bosses.forEach((b,index)=>{
 
- let option=document.createElement("option")
+   let opt=document.createElement("option")
 
- option.value=i
- option.textContent=boss.nome
+   opt.value=index
+   opt.textContent=b.nome
 
- select.appendChild(option)
+   select.appendChild(opt)
 
-})
+  })
 
-select.value = t.bossId || 0
+  select.value=t.bossId || 0
 
-select.onchange = ()=>{
+  select.onchange=()=>{
 
- config.timers[i].bossId = parseInt(select.value)
+   config.timers[i].bossId=parseInt(select.value)
+   saveGlobal()
 
- saveGlobal()
-
-}
+  }
 
   let label=document.createElement("span")
   label.textContent="00:00"
@@ -190,10 +137,6 @@ select.onchange = ()=>{
 
   progress.appendChild(bar)
 
-  if(!localData.hotkeys[i]){
-  localData.hotkeys[i]=""
-  }
-  
   let btn=document.createElement("button")
   btn.textContent="Start"
 
@@ -208,16 +151,36 @@ select.onchange = ()=>{
 }
 
 /* =========================
-START / STOP
+ADD TIMER
 ========================= */
 
-function toggleTimer(i){
+document.getElementById("addTimer").onclick=()=>{
 
- if(intervals[i]){
-  stopTimer(i)
- }else{
-  startTimer(i)
- }
+ if(config.timers.length>=8) return
+
+ config.timers.push({bossId:0})
+
+ saveGlobal()
+
+}
+
+/* =========================
+REMOVE TIMER
+========================= */
+
+document.getElementById("removeTimer").onclick=()=>{
+
+ if(config.timers.length<=1) return
+
+ let index=config.timers.length-1
+
+ stopTimer(index)
+
+ set(ref(db,"timers/"+index),null)
+
+ config.timers.pop()
+
+ saveGlobal()
 
 }
 
@@ -227,13 +190,15 @@ START TIMER
 
 function startTimer(i){
 
- let bossId = config.timers[i].bossId
+ let bossId=config.timers[i].bossId
 
-let total = config.bosses[bossId].tempo * 60
+ let total=config.bosses[bossId].tempo*60
 
  set(ref(db,"timers/"+i),{
+
   start:Date.now(),
   tempo:total
+
  })
 
 }
@@ -245,20 +210,26 @@ STOP TIMER
 function stopTimer(i){
 
  clearInterval(intervals[i])
+
  intervals[i]=null
 
  delete activeTimers[i]
+
  updateBigTimer()
 
- let label=document.querySelectorAll(".timer span")[i*2+1]
+ let label=document.querySelectorAll(".timer span")[i]
  let bar=document.querySelectorAll(".bar")[i]
  let btn=document.querySelectorAll(".timer button")[i]
 
- label.textContent="00:00"
- bar.style.width="0%"
- btn.textContent="Start"
+ if(label){
 
- set(ref(db,"timers/"+i), null)
+  label.textContent="00:00"
+  bar.style.width="0%"
+  btn.textContent="Start"
+
+ }
+
+ set(ref(db,"timers/"+i),null)
 
 }
 
@@ -276,24 +247,9 @@ function syncTimers(){
 
    const data=snapshot.val()
 
-   const label=document.querySelectorAll(".timer span")[i*2+1]
-   const bar=document.querySelectorAll(".bar")[i]
-   const btn=document.querySelectorAll(".timer button")[i]
-
    if(data===null){
 
-    clearInterval(intervals[i])
-    intervals[i]=null
-
-    delete activeTimers[i]
-    updateBigTimer()
-
-    if(label){
-     label.textContent="00:00"
-     bar.style.width="0%"
-     btn.textContent="Start"
-    }
-
+    stopTimer(i)
     return
 
    }
@@ -312,7 +268,7 @@ RUN TIMER
 
 function runTimer(i,data){
 
- let label=document.querySelectorAll(".timer span")[i*2+1]
+ let label=document.querySelectorAll(".timer span")[i]
  let bar=document.querySelectorAll(".bar")[i]
  let btn=document.querySelectorAll(".timer button")[i]
 
@@ -339,15 +295,16 @@ function runTimer(i,data){
   btn.textContent="Stop"
 
   activeTimers[i]={
+
    remaining:remaining,
-   label:config.timers[i].nome
+   label:config.bosses[config.timers[i].bossId].nome
+
   }
 
   updateBigTimer()
 
   if(remaining<=0){
 
-   delete activeTimers[i]
    stopTimer(i)
 
   }
@@ -357,7 +314,7 @@ function runTimer(i,data){
 }
 
 /* =========================
-BIG TIMER LOGIC
+BIG TIMER
 ========================= */
 
 function updateBigTimer(){
@@ -402,24 +359,6 @@ function updateBigTimer(){
 }
 
 /* =========================
-HOTKEYS
-========================= */
-
-document.addEventListener("keydown",(e)=>{
-
- let key=e.key.toLowerCase()
-
- localData.hotkeys.forEach((hk,i)=>{
-
-  if(key===hk){
-   document.querySelectorAll(".timer button")[i].click()
-  }
-
- })
-
-})
-
-/* =========================
 CONFIG PANEL
 ========================= */
 
@@ -428,31 +367,29 @@ document.getElementById("configBtn").onclick=()=>{
  let panel=document.getElementById("configPanel")
  panel.classList.toggle("hidden")
 
- renderConfig()
-
 }
 
-function renderConfig(){
+/* =========================
+RENDER BOSS CONFIG
+========================= */
 
- let div=document.getElementById("configTimers")
+function renderBossConfig(){
+
+ let div=document.getElementById("bossConfig")
  div.innerHTML=""
 
- config.timers.forEach((t,i)=>{
+ config.bosses.forEach((b,i)=>{
 
   let row=document.createElement("div")
 
   let nome=document.createElement("input")
-  nome.value=t.nome
+  nome.value=b.nome
 
   let tempo=document.createElement("input")
-  tempo.value=t.tempo
+  tempo.value=b.tempo
   tempo.style.width="60px"
 
-  let key=document.createElement("input")
-  key.value=localData.hotkeys[i]
-  key.style.width="60px"
-
-  row.append(nome,tempo,key)
+  row.append(nome,tempo)
 
   div.appendChild(row)
 
@@ -460,160 +397,61 @@ function renderConfig(){
 
 }
 
-document.getElementById("saveConfig").onclick=()=>{
- 
-let rows=document.querySelectorAll("#bossConfig div")
+/* =========================
+ADD BOSS
+========================= */
 
-config.bosses=[]
-
-rows.forEach((row)=>{
-
- let inputs=row.querySelectorAll("input")
+document.getElementById("addBoss").onclick=()=>{
 
  config.bosses.push({
-  nome:inputs[0].value,
-  tempo:parseFloat(inputs[1].value)
+
+  nome:"Novo Boss",
+  tempo:30
+
  })
 
-})
+ renderBossConfig()
 
-set(ref(db,"config/bosses"),config.bosses)
- let rows=document.querySelectorAll("#configTimers div")
+}
 
- rows.forEach((row,i)=>{
+/* =========================
+SAVE CONFIG
+========================= */
+
+document.getElementById("saveConfig").onclick=()=>{
+
+ let rows=document.querySelectorAll("#bossConfig div")
+
+ config.bosses=[]
+
+ rows.forEach((row)=>{
 
   let inputs=row.querySelectorAll("input")
 
-  config.timers[i].nome=inputs[0].value
-  config.timers[i].tempo=parseFloat(inputs[1].value)
+  config.bosses.push({
 
-  localData.hotkeys[i]=inputs[2].value.toLowerCase()
-  
+   nome:inputs[0].value,
+   tempo:parseFloat(inputs[1].value)
+
+  })
+
  })
 
- saveLocal()
- saveGlobal()
+ set(ref(db,"config/bosses"),config.bosses)
 
  document.getElementById("configPanel").classList.add("hidden")
 
 }
 
 /* =========================
-OBS MODE
-========================= */
-
-let obsMode=false
-
-document.getElementById("obsBtn").onclick=()=>{
-
- obsMode=true
-
- document.querySelector(".rightPanel").style.display="none"
- document.querySelector(".header").style.display="none"
-
- document.querySelector(".leftPanel").style.width="100%"
-
- document.getElementById("exitObs").classList.remove("hidden")
-
-}
-
-document.getElementById("exitObs").onclick=()=>{
-
- obsMode=false
-
- document.querySelector(".rightPanel").style.display="block"
- document.querySelector(".header").style.display="flex"
-
- document.querySelector(".leftPanel").style.width="40%"
-
- document.getElementById("exitObs").classList.add("hidden")
-
-}
-
-/* =========================
-Adicionando/Removendo Timers
-========================= */
-
-
-document.getElementById("addTimer").onclick = ()=>{
-
- if(config.timers.length >= 8){
-  alert("Máximo de 8 timers atingido")
-  return
- }
-
- let index = config.timers.length + 1
-
- config.timers.push({
-  nome:"Timer "+index,
-  tempo:10
- })
-
- localData.hotkeys.push("")
-
- intervals.push(null)
-
- saveLocal()
- saveGlobal()
-
-}
-
-document.getElementById("removeTimer").onclick = ()=>{
-
- if(config.timers.length <= 1){
-  alert("Mínimo de 1 timer")
-  return
- }
-
- let index = config.timers.length - 1
-
- // parar timer se estiver ativo
- stopTimer(index)
-
- // remover do firebase
- set(ref(db,"timers/"+index), null)
-
- // remover da config
- config.timers.pop()
-
- // remover hotkey
- localData.hotkeys.pop()
-
- // remover interval
- intervals.pop()
-
- saveLocal()
- saveGlobal()
-
-}
-
-/* =========================
-Fechar Config Clickando Fora
-========================= */
-
-document.addEventListener("click",(e)=>{
-
- const panel=document.getElementById("configPanel")
-
- if(panel.classList.contains("hidden")) return
-
- if(!panel.contains(e.target) && e.target.id !== "configBtn"){
-
-  panel.classList.add("hidden")
-
- }
-
-})
-
-/* =========================
-UpdateBoss
+UPDATE DROPDOWNS
 ========================= */
 
 function updateBossDropdowns(){
 
  document.querySelectorAll(".timer select").forEach((select)=>{
 
-  let current = select.value
+  let current=select.value
 
   select.innerHTML=""
 
@@ -638,7 +476,5 @@ function updateBossDropdowns(){
 INIT
 ========================= */
 
-createTimers()
-loadConfig()
-syncTimers()
 loadBosses()
+loadConfig()
