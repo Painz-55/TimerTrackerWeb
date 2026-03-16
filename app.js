@@ -205,7 +205,15 @@ START TIMER
 
 function startTimer(i){
 
- let bossId=config.timers[i].bossId
+ let timerDiv=document.querySelectorAll(".timer")[i]
+
+ if(timerDiv){
+  timerDiv.classList.remove("finished")
+ }
+
+ let bossId=config.timers[i].bossId ?? 0
+
+ if(!config.bosses[bossId]) return
 
  let total=config.bosses[bossId].tempo*60
 
@@ -341,13 +349,32 @@ function runTimer(i,data){
 
   updateBigTimer()
 
-  if(remaining<=0){
+ if(remaining<=0){
 
-   stopTimer(i)
+  triggerTimerFinished(i)
 
-  }
+ }
 
  },1000)
+
+}
+
+/* =========================
+TIMER FINISHED
+========================= */
+
+function triggerTimerFinished(i){
+
+ clearInterval(intervals[i])
+ intervals[i]=null
+
+ let timerDiv=document.querySelectorAll(".timer")[i]
+
+ if(timerDiv){
+  timerDiv.classList.add("finished")
+ }
+
+ playAlarm()
 
 }
 
@@ -393,6 +420,21 @@ function updateBigTimer(){
 
  document.getElementById("bigLabel").textContent=
   activeTimers[index].label
+
+}
+
+/* =========================
+Play Alarm
+========================= */
+
+function playAlarm(){
+
+ let audio=document.getElementById("alarmSound")
+
+ if(!audio) return
+
+ audio.currentTime=0
+ audio.play()
 
 }
 
