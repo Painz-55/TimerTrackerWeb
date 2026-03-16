@@ -485,6 +485,62 @@ exitObs.onclick = ()=>{
 }
 
 /* =========================
+BossConfigPainel
+========================= */
+
+function renderBossConfig(){
+
+ const list=document.getElementById("bossList")
+
+ list.innerHTML=""
+
+ config.bosses.forEach((boss,index)=>{
+
+  const row=document.createElement("div")
+  row.className="bossRow"
+
+  const name=document.createElement("input")
+  name.value=boss.nome
+  name.placeholder="Boss name"
+
+  name.oninput=()=>{
+   config.bosses[index].nome=name.value
+   saveConfig()
+   updateBossDropdowns()
+  }
+
+  const tempo=document.createElement("input")
+  tempo.type="number"
+  tempo.value=boss.tempo
+
+  tempo.oninput=()=>{
+   config.bosses[index].tempo=parseInt(tempo.value) || 0
+   saveConfig()
+  }
+
+  const del=document.createElement("button")
+  del.textContent="X"
+
+  del.onclick=(e)=>{
+   e.stopPropagation()
+
+   config.bosses.splice(index,1)
+
+   saveConfig()
+   renderBossConfig()
+   updateBossDropdowns()
+  }
+
+  row.append(name,tempo,del)
+
+  list.appendChild(row)
+
+ })
+
+}
+
+
+/* =========================
 CONFIG PANEL
 ========================= */
 
@@ -516,6 +572,36 @@ document.addEventListener("click",(e)=>{
  }
 
 })
+
+/* =========================
+CONFIG Painel
+========================= */
+
+function updateBossDropdowns(){
+
+ const selects=document.querySelectorAll(".timer select")
+
+ selects.forEach((select,i)=>{
+
+  const current=config.timers[i]?.bossId ?? 0
+
+  select.innerHTML=""
+
+  config.bosses.forEach((b,index)=>{
+
+   let opt=document.createElement("option")
+   opt.value=index
+   opt.textContent=b.nome
+
+   select.appendChild(opt)
+
+  })
+
+  select.value=current
+
+ })
+
+}
 
 /* =========================
 INIT
