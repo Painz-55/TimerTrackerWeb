@@ -60,7 +60,6 @@ function loadBosses(){
  onValue(bossRef,(snapshot)=>{
 
   const data=snapshot.val()
-
   if(!data) return
 
   config.bosses=data
@@ -83,7 +82,6 @@ function loadConfig(){
  onValue(configRef,(snapshot)=>{
 
   const data=snapshot.val()
-
   if(!data) return
 
   config.timers=data
@@ -128,10 +126,8 @@ function createTimers(){
   config.bosses.forEach((b,index)=>{
 
    let opt=document.createElement("option")
-
    opt.value=index
    opt.textContent=b.nome
-
    select.appendChild(opt)
 
   })
@@ -139,10 +135,8 @@ function createTimers(){
   select.value=t.bossId || 0
 
   select.onchange=()=>{
-
    config.timers[i].bossId=parseInt(select.value)
    saveGlobal()
-
   }
 
   let label=document.createElement("span")
@@ -178,7 +172,6 @@ document.getElementById("addTimer").onclick=()=>{
  if(config.timers.length>=8) return
 
  config.timers.push({bossId:0})
-
  saveGlobal()
 
 }
@@ -194,7 +187,6 @@ document.getElementById("removeTimer").onclick=()=>{
  let index=config.timers.length-1
 
  stopTimer(index)
-
  set(ref(db,"timers/"+index),null)
 
  config.timers.pop()
@@ -231,14 +223,7 @@ START TIMER
 
 function startTimer(i){
 
- let timerDiv=document.querySelectorAll(".timer")[i]
-
- if(timerDiv){
-  timerDiv.classList.remove("finished")
- }
-
  let bossId=config.timers[i].bossId ?? 0
-
  if(!config.bosses[bossId]) return
 
  let total=config.bosses[bossId].tempo*60
@@ -356,7 +341,7 @@ function runTimer(i,data){
   let m=Math.floor(remaining/60)
   let s=remaining%60
 
-  label.textContent=
+  label.textContent =
    String(m).padStart(2,"0")+":"+
    String(s).padStart(2,"0")
 
@@ -373,9 +358,9 @@ function runTimer(i,data){
 
   updateBigTimer()
 
- if(remaining<=0){
-  triggerTimerFinished(i)
- }
+  if(remaining<=0){
+   triggerTimerFinished(i)
+  }
 
  },1000)
 
@@ -423,10 +408,8 @@ function updateBigTimer(){
  keys.forEach(k=>{
 
   if(lowest===null || activeTimers[k].remaining<lowest){
-
    lowest=activeTimers[k].remaining
    index=k
-
   }
 
  })
@@ -436,23 +419,21 @@ function updateBigTimer(){
  let m=Math.floor(remaining/60)
  let s=remaining%60
 
- document.getElementById("bigTimer").textContent=
-  String(m).padStart(2,"0")+":"+
-  String(s).padStart(2,"0")
+ document.getElementById("bigTimer").textContent =
+  String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")
 
- document.getElementById("bigLabel").textContent=
+ document.getElementById("bigLabel").textContent =
   activeTimers[index].label
 
 }
 
 /* =========================
-Play Alarm
+ALARM
 ========================= */
 
 function playAlarm(){
 
  let audio=document.getElementById("alarmSound")
-
  if(!audio) return
 
  audio.currentTime=0
@@ -463,7 +444,6 @@ function playAlarm(){
 function stopAlarm(){
 
  let audio=document.getElementById("alarmSound")
-
  if(!audio) return
 
  audio.pause()
@@ -503,6 +483,39 @@ exitObs.onclick = ()=>{
  exitObs.classList.add("hidden")
 
 }
+
+/* =========================
+CONFIG PANEL
+========================= */
+
+document.getElementById("configBtn").onclick=(e)=>{
+
+ e.stopPropagation()
+
+ document.getElementById("configPanel").classList.toggle("hidden")
+
+}
+
+document.getElementById("closeConfig").onclick=(e)=>{
+
+ e.stopPropagation()
+
+ document.getElementById("configPanel").classList.add("hidden")
+
+}
+
+document.addEventListener("click",(e)=>{
+
+ const panel=document.getElementById("configPanel")
+ const btn=document.getElementById("configBtn")
+
+ if(panel.classList.contains("hidden")) return
+
+ if(!panel.contains(e.target) && !btn.contains(e.target)){
+  panel.classList.add("hidden")
+ }
+
+})
 
 /* =========================
 INIT
