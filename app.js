@@ -480,7 +480,20 @@ function renderBossConfig(){
   del.dataset.index=i
 
   del.onclick=()=>{
-   deleteBoss(i)
+
+   if(config.bosses.length<=1){
+    alert("Deve existir pelo menos 1 boss.")
+    return
+   }
+
+   config.bosses.splice(i,1)
+
+   saveConfig()
+
+   renderBossConfig()
+
+   createTimers()
+
   }
 
   row.append(nome,tempo,del)
