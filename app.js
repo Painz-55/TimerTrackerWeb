@@ -446,11 +446,14 @@ function runTimer(i,data){
 
   updateBigTimer()
 
-  if(remaining<=0){
-   triggerTimerFinished(i)
-  }
+if(remaining<=0){
 
- },1000)
+ remaining=0
+ label.textContent="00:00"
+
+ triggerTimerFinished(i)
+
+},1000)
 
 }
 
