@@ -1,411 +1,75 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+<!DOCTYPE html>
+<html>
 
-/* =========================
-FIREBASE
-========================= */
+<head>
 
-const firebaseConfig = {
- apiKey: "AIzaSyAdCJ_Ux1YrjQdxSgutu_SvqTQTNIDVLUs",
- authDomain: "timertracker-77df3.firebaseapp.com",
- databaseURL: "https://timertracker-77df3-default-rtdb.firebaseio.com",
- projectId: "timertracker-77df3",
- storageBucket: "timertracker-77df3.firebasestorage.app",
- messagingSenderId: "1071640359296",
- appId: "1:1071640359296:web:c02cd908aca9a8547d1165"
-};
+<meta charset="UTF-8">
+<title>TimerTracker</title>
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+<link rel="stylesheet" href="style.css">
 
-/* =========================
-LOCAL DATA
-========================= */
+</head>
 
-let localData = JSON.parse(localStorage.getItem("timertracker")) || {
- hotkeys:["f5","f6","f7","f8"]
-};
+<body>
 
-let config = {
- timers:[
-  {nome:"Timer 1",tempo:8},
-  {nome:"Timer 2",tempo:30},
-  {nome:"Timer 3",tempo:15},
-  {nome:"Timer 4",tempo:60}
- ]
-};
+<div class="topbar">
 
-let intervals=[null,null,null,null]
-let activeTimers={}
+<h1>TimerTracker</h1>
 
-/* =========================
-SAVE LOCAL
-========================= */
+<div class="topButtons">
+<button id="obsBtn">OBS</button>
+<button id="exitObsBtn" class="hidden">Exit OBS</button>
+<button id="configBtn">⚙</button>
+</div>
 
-function saveLocal(){
- localStorage.setItem("timertracker",JSON.stringify(localData))
-}
+</div>
 
-/* =========================
-SAVE GLOBAL
-========================= */
 
-function saveGlobal(){
- set(ref(db,"config/timers"),config.timers)
-}
+<div class="dashboard">
 
-/* =========================
-LOAD CONFIG
-========================= */
+<!-- TIMER GRANDE -->
 
-function loadConfig(){
+<div class="leftPanel">
 
- const configRef = ref(db,"config/timers")
+<div id="bigTimer">
 
- onValue(configRef,(snapshot)=>{
+<div id="bigTimerName">No Active Timer</div>
+<div id="bigTimerTime">00:00</div>
 
-  const data=snapshot.val()
+<div class="bigProgress">
+<div id="bigBar"></div>
+</div>
 
-  if(data){
-   config.timers=data
-  }
+</div>
 
-  // criar timers
-  createTimers()
+</div>
 
-  // sincronizar apenas depois
-  syncTimers()
 
- })
+<!-- TIMERS -->
 
-}
+<div class="rightPanel">
 
-/* =========================
-CREATE UI
-========================= */
+<div id="timers"></div>
 
-function createTimers(){
+</div>
 
- let container=document.getElementById("timers")
- container.innerHTML=""
+</div>
 
- config.timers.forEach((t,i)=>{
 
-  let div=document.createElement("div")
-  div.className="timer"
+<!-- CONFIG -->
 
-  let name=document.createElement("span")
-  name.textContent=t.nome
+<div id="configPanel" class="hidden">
 
-  let label=document.createElement("span")
-  label.textContent="00:00"
+<h2>Configurações</h2>
 
-  let progress=document.createElement("div")
-  progress.className="progress"
+<div id="configTimers"></div>
 
-  let bar=document.createElement("div")
-  bar.className="bar"
+<button id="saveConfig">Salvar</button>
 
-  progress.appendChild(bar)
+</div>
 
-  let btn=document.createElement("button")
-  btn.textContent="Start"
 
-  btn.onclick=()=>toggleTimer(i)
+<script type="module" src="app.js"></script>
 
-  div.append(name,label,progress,btn)
-
-  container.appendChild(div)
-
- })
-
-}
-
-/* =========================
-START / STOP
-========================= */
-
-function toggleTimer(i){
- if(intervals[i]){
-  stopTimer(i)
- }else{
-  startTimer(i)
- }
-}
-
-function startTimer(i){
-
- let total=config.timers[i].tempo*60
-
- set(ref(db,"timers/"+i),{
-  start:Date.now(),
-  tempo:total
- })
-
-}
-
-function stopTimer(i){
-
- clearInterval(intervals[i])
- intervals[i]=null
-
- delete activeTimers[i]
- updateBigTimer()
-
- let label=document.querySelectorAll(".timer span")[i*2+1]
- let bar=document.querySelectorAll(".bar")[i]
- let btn=document.querySelectorAll(".timer button")[i]
-
- label.textContent="00:00"
- bar.style.width="0%"
- btn.textContent="Start"
-
- set(ref(db,"timers/"+i), null)
-
-}
-
-/* =========================
-SYNC TIMERS
-========================= */
-
-function syncTimers(){
-
- config.timers.forEach((t,i)=>{
-
-  const timerRef=ref(db,"timers/"+i)
-
-  onValue(timerRef,(snapshot)=>{
-
-   const data=snapshot.val()
-
-   const label=document.querySelectorAll(".timer span")[i*2+1]
-   const bar=document.querySelectorAll(".bar")[i]
-   const btn=document.querySelectorAll(".timer button")[i]
-
-   if(data===null){
-
-    clearInterval(intervals[i])
-    intervals[i]=null
-
-    delete activeTimers[i]
-    updateBigTimer()
-
-    if(label){
-     label.textContent="00:00"
-     bar.style.width="0%"
-     btn.textContent="Start"
-    }
-
-    return
-   }
-
-   runTimer(i,data)
-
-  })
-
- })
-
-}
-
-/* =========================
-RUN TIMER
-========================= */
-
-function runTimer(i,data){
-
- let label=document.querySelectorAll(".timer span")[i*2+1]
- let bar=document.querySelectorAll(".bar")[i]
- let btn=document.querySelectorAll(".timer button")[i]
-
- let total=data.tempo
-
- clearInterval(intervals[i])
-
- intervals[i]=setInterval(()=>{
-
-  let elapsed=(Date.now()-data.start)/1000
-  let remaining=Math.floor(total-elapsed)
-
-  if(remaining<0) remaining=0
-
-  let m=Math.floor(remaining/60)
-  let s=remaining%60
-
-  label.textContent=
-   String(m).padStart(2,"0")+":"+
-   String(s).padStart(2,"0")
-
-  bar.style.width=((total-remaining)/total*100)+"%"
-
-  btn.textContent="Stop"
-
-  activeTimers[i]={
-   remaining:remaining,
-   label:config.timers[i].nome
-  }
-
-  updateBigTimer()
-
-  if(remaining<=0){
-   delete activeTimers[i]
-   stopTimer(i)
-  }
-
- },1000)
-
-}
-
-/* =========================
-BIG TIMER LOGIC
-========================= */
-
-function updateBigTimer(){
-
- let keys=Object.keys(activeTimers)
-
- if(keys.length===0){
-
-  document.getElementById("bigTimer").textContent="00:00"
-  document.getElementById("bigLabel").textContent="No Timer Running"
-  return
- }
-
- let lowest=null
- let index=null
-
- keys.forEach(k=>{
-  if(lowest===null || activeTimers[k].remaining<lowest){
-   lowest=activeTimers[k].remaining
-   index=k
-  }
- })
-
- let remaining=activeTimers[index].remaining
-
- let m=Math.floor(remaining/60)
- let s=remaining%60
-
- document.getElementById("bigTimer").textContent=
-  String(m).padStart(2,"0")+":"+
-  String(s).padStart(2,"0")
-
- document.getElementById("bigLabel").textContent=
-  activeTimers[index].label
-
-}
-
-/* =========================
-HOTKEYS
-========================= */
-
-document.addEventListener("keydown",(e)=>{
-
- let key=e.key.toLowerCase()
-
- localData.hotkeys.forEach((hk,i)=>{
-  if(key===hk){
-   document.querySelectorAll(".timer button")[i].click()
-  }
- })
-
-})
-
-/* =========================
-CONFIG PANEL
-========================= */
-
-document.getElementById("configBtn").onclick=()=>{
- let panel=document.getElementById("configPanel")
- panel.classList.toggle("hidden")
- renderConfig()
-}
-
-function renderConfig(){
-
- let div=document.getElementById("configTimers")
- div.innerHTML=""
-
- config.timers.forEach((t,i)=>{
-
-  let row=document.createElement("div")
-
-  let nome=document.createElement("input")
-  nome.value=t.nome
-
-  let tempo=document.createElement("input")
-  tempo.value=t.tempo
-  tempo.style.width="60px"
-
-  let key=document.createElement("input")
-  key.value=localData.hotkeys[i]
-  key.style.width="60px"
-
-  row.append(nome,tempo,key)
-  div.appendChild(row)
-
- })
-
-}
-
-document.getElementById("saveConfig").onclick=()=>{
-
- let rows=document.querySelectorAll("#configTimers div")
-
- rows.forEach((row,i)=>{
-
-  let inputs=row.querySelectorAll("input")
-
-  config.timers[i].nome=inputs[0].value
-  config.timers[i].tempo=parseFloat(inputs[1].value)
-
-  localData.hotkeys[i]=inputs[2].value.toLowerCase()
-
- })
-
- saveLocal()
- saveGlobal()
-
- alert("Configuração salva")
-
-}
-
-/* =========================
-OBS MODE
-========================= */
-
-const obsBtn=document.getElementById("obsBtn")
-const exitObs=document.getElementById("exitObs")
-
-obsBtn.onclick=()=>{
-
- document.querySelector(".rightPanel").style.display="none"
-
- document.querySelector(".leftPanel").style.width="100%"
- document.querySelector(".leftPanel").style.height="100vh"
-
- document.querySelector("#bigTimer").style.fontSize="220px"
- document.querySelector("#bigLabel").style.fontSize="40px"
-
- exitObs.classList.remove("hidden")
-
-}
-
-exitObs.onclick=()=>{
-
- document.querySelector(".rightPanel").style.display="block"
-
- document.querySelector(".leftPanel").style.width="40%"
- document.querySelector(".leftPanel").style.height="auto"
-
- document.querySelector("#bigTimer").style.fontSize="140px"
- document.querySelector("#bigLabel").style.fontSize="22px"
-
- exitObs.classList.add("hidden")
-
-}
-
-/* =========================
-INIT
-========================= */
-
-loadConfig()
+</body>
+</html>
