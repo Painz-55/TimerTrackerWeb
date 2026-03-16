@@ -185,6 +185,20 @@ document.getElementById("removeTimer").onclick=()=>{
 }
 
 /* =========================
+START / STOP
+========================= */
+
+function toggleTimer(i){
+
+ if(intervals[i]){
+  stopTimer(i)
+ }else{
+  startTimer(i)
+ }
+
+}
+
+/* =========================
 START TIMER
 ========================= */
 
@@ -241,15 +255,24 @@ function syncTimers(){
 
  config.timers.forEach((t,i)=>{
 
-  const timerRef=ref(db,"timers/"+i)
+  const timerRef = ref(db,"timers/"+i)
 
   onValue(timerRef,(snapshot)=>{
 
-   const data=snapshot.val()
+   const data = snapshot.val()
+
+   const btn=document.querySelectorAll(".timer button")[i]
 
    if(data===null){
 
-    stopTimer(i)
+    clearInterval(intervals[i])
+    intervals[i]=null
+
+    if(btn) btn.textContent="Start"
+
+    delete activeTimers[i]
+    updateBigTimer()
+
     return
 
    }
