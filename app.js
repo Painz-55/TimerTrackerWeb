@@ -461,19 +461,57 @@ function renderBossConfig(){
  config.bosses.forEach((b,i)=>{
 
   let row=document.createElement("div")
+  row.className="bossRow"
 
   let nome=document.createElement("input")
   nome.value=b.nome
+  nome.dataset.index=i
+  nome.className="bossName"
 
   let tempo=document.createElement("input")
   tempo.value=b.tempo
   tempo.style.width="60px"
+  tempo.dataset.index=i
+  tempo.className="bossTempo"
 
-  row.append(nome,tempo)
+  let del=document.createElement("button")
+  del.textContent="❌"
+  del.className="deleteBoss"
+  del.dataset.index=i
+
+  del.onclick=()=>{
+   deleteBoss(i)
+  }
+
+  row.append(nome,tempo,del)
 
   div.appendChild(row)
 
  })
+
+}
+
+document.addEventListener("click",(e)=>{
+
+ if(e.target.classList.contains("deleteBoss")){
+
+  const index=parseInt(e.target.dataset.index)
+
+  deleteBoss(index)
+
+ }
+
+})
+
+function deleteBoss(i){
+
+ config.bosses.splice(i,1)
+
+ saveConfig()
+
+ renderBossConfig()
+
+ createTimers()
 
 }
 
