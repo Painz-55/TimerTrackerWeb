@@ -623,6 +623,44 @@ document.getElementById("closeConfig").onclick=()=>{
 
 }
 
+
+/* =========================
+OBS MODE
+========================= */
+
+const obsBtn = document.getElementById("obsBtn")
+const exitObs = document.getElementById("exitObs")
+
+obsBtn.onclick = ()=>{
+
+ const rightPanel = document.querySelector(".rightPanel")
+ const leftPanel = document.querySelector(".leftPanel")
+
+ rightPanel.style.display = "none"
+ leftPanel.style.width = "100%"
+
+ obsBtn.style.display = "none"
+ exitObs.classList.remove("hidden")
+
+}
+
+/* =========================
+EXIT OBS MODE
+========================= */
+
+exitObs.onclick = ()=>{
+
+ const rightPanel = document.querySelector(".rightPanel")
+ const leftPanel = document.querySelector(".leftPanel")
+
+ rightPanel.style.display = "block"
+ leftPanel.style.width = "40%"
+
+ obsBtn.style.display = "inline-block"
+ exitObs.classList.add("hidden")
+
+}
+
 /* =========================
 INIT
 ========================= */
