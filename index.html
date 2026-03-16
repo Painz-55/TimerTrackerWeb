@@ -1,379 +1,158 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"
-import { getDatabase, ref, set, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"
+body{
 
+background:#0f0f12;
+color:white;
+font-family:Arial;
+margin:0;
 
-/* FIREBASE */
-
-const firebaseConfig = {
- apiKey: "AIzaSyAdCJ_Ux1YrjQdxSgutu_SvqTQTNIDVLUs",
- authDomain: "timertracker-77df3.firebaseapp.com",
- databaseURL: "https://timertracker-77df3-default-rtdb.firebaseio.com",
- projectId: "timertracker-77df3",
- storageBucket: "timertracker-77df3.firebasestorage.app",
- messagingSenderId: "1071640359296",
- appId: "1:1071640359296:web:c02cd908aca9a8547d1165"
 }
 
-const app = initializeApp(firebaseConfig)
-const db = getDatabase(app)
+.dashboard{
 
+display:flex;
+height:100vh;
+
+}
+
+/* LEFT */
+
+.leftPanel{
+
+width:40%;
+background:#111;
+display:flex;
+align-items:center;
+justify-content:center;
+
+}
+
+.mainTimer{
+
+text-align:center;
+
+}
+
+#bigTimer{
+
+font-size:140px;
+font-weight:bold;
+color:#ff4c4c;
+
+}
+
+#bigLabel{
+
+font-size:22px;
+opacity:.7;
+
+}
+
+/* RIGHT */
+
+.rightPanel{
+
+flex:1;
+padding:30px;
+overflow:auto;
+
+}
+
+.header{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+
+}
+
+.timer{
+
+background:#1b1b1f;
+padding:20px;
+border-radius:8px;
+margin-bottom:15px;
+
+display:flex;
+align-items:center;
+gap:15px;
+
+}
+
+.timer span:first-child{
+
+width:150px;
+font-size:18px;
+
+}
+
+.timer span:nth-child(2){
+
+width:70px;
+font-size:18px;
+
+}
+
+.progress{
+
+flex:1;
+height:8px;
+background:#333;
+border-radius:5px;
+overflow:hidden;
+
+}
+
+.bar{
+
+height:100%;
+background:#ff4c4c;
+width:0%;
+
+}
+
+button{
+
+background:#ff4c4c;
+border:none;
+color:white;
+padding:8px 14px;
+border-radius:4px;
+cursor:pointer;
+
+}
+
+button:hover{
+
+background:#ff6b6b;
+
+}
 
 /* CONFIG */
 
-let localData = JSON.parse(localStorage.getItem("timertracker")) || {
- hotkeys:["f5","f6","f7","f8"]
-}
+#configPanel{
 
-let config = {
- timers:[
-  {nome:"Timer 1",tempo:8},
-  {nome:"Timer 2",tempo:30},
-  {nome:"Timer 3",tempo:15},
-  {nome:"Timer 4",tempo:60}
- ]
-}
-
-let intervals=[null,null,null,null]
-let activeTimers=[null,null,null,null]
-
-
-/* CRIAR TIMERS */
-
-function createTimers(){
-
- let container=document.getElementById("timers")
- container.innerHTML=""
-
- config.timers.forEach((t,i)=>{
-
-  let div=document.createElement("div")
-  div.className="timer"
-
-  let name=document.createElement("span")
-  name.className="name"
-  name.textContent=t.nome
-
-  let label=document.createElement("span")
-  label.className="time"
-  label.textContent="00:00"
-
-  let progress=document.createElement("div")
-  progress.className="progress"
-
-  let bar=document.createElement("div")
-  bar.className="bar"
-
-  progress.appendChild(bar)
-
-  let btn=document.createElement("button")
-  btn.textContent="Start"
-
-  btn.onclick=()=>toggleTimer(i)
-
-  div.append(name,label,progress,btn)
-
-  container.appendChild(div)
-
- })
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:#1b1b1f;
+padding:30px;
+border-radius:8px;
 
 }
 
+.hidden{
 
-/* START / STOP */
-
-function toggleTimer(i){
-
- if(activeTimers[i]){
-
-  remove(ref(db,"timers/"+i))
-
- }else{
-
-  startTimer(i)
-
- }
+display:none;
 
 }
 
+input{
 
-function startTimer(i){
-
- let total=config.timers[i].tempo*60
-
- set(ref(db,"timers/"+i),{
-  start:Date.now(),
-  tempo:total
- })
+background:#111;
+border:1px solid #444;
+color:white;
+padding:5px;
 
 }
-
-
-/* SINCRONIZAÇÃO */
-
-function syncTimers(){
-
- config.timers.forEach((t,i)=>{
-
-  const timerRef=ref(db,"timers/"+i)
-
-  onValue(timerRef,(snapshot)=>{
-
-   const data=snapshot.val()
-
-   if(!data){
-
-    stopLocalTimer(i)
-    activeTimers[i]=null
-    return
-
-   }
-
-   activeTimers[i]=data
-   runTimer(i,data)
-
-  })
-
- })
-
-}
-
-
-/* EXECUTAR TIMER */
-
-function runTimer(i,data){
-
- let timer=document.querySelectorAll(".timer")[i]
- let label=timer.querySelector(".time")
- let bar=timer.querySelector(".bar")
- let btn=timer.querySelector("button")
-
- let total=data.tempo
-
- clearInterval(intervals[i])
-
- intervals[i]=setInterval(()=>{
-
-  let elapsed=(Date.now()-data.start)/1000
-  let remaining=Math.floor(total-elapsed)
-
-  if(remaining<0) remaining=0
-
-  let m=Math.floor(remaining/60)
-  let s=remaining%60
-
-  label.textContent=
-  String(m).padStart(2,"0")+":"+
-  String(s).padStart(2,"0")
-
-  bar.style.width=((total-remaining)/total*100)+"%"
-
-  btn.textContent="Stop"
-
-  updateBigTimer()
-
-  if(remaining<=0){
-
-   clearInterval(intervals[i])
-   intervals[i]=null
-
-   btn.textContent="Start"
-
-  }
-
- },1000)
-
-}
-
-
-/* PARAR LOCAL */
-
-function stopLocalTimer(i){
-
- clearInterval(intervals[i])
-
- let timer=document.querySelectorAll(".timer")[i]
-
- if(!timer) return
-
- let label=timer.querySelector(".time")
- let bar=timer.querySelector(".bar")
- let btn=timer.querySelector("button")
-
- label.textContent="00:00"
- bar.style.width="0%"
- btn.textContent="Start"
-
- updateBigTimer()
-
-}
-
-
-/* TIMER GRANDE */
-
-function updateBigTimer(){
-
- let soonest=null
- let soonIndex=null
-
- activeTimers.forEach((t,i)=>{
-
-  if(!t) return
-
-  let remaining=t.tempo-(Date.now()-t.start)/1000
-
-  if(!soonest || remaining<soonest){
-
-   soonest=remaining
-   soonIndex=i
-
-  }
-
- })
-
- if(soonIndex==null){
-
-  document.getElementById("bigTimerName").textContent="No Active Timer"
-  document.getElementById("bigTimerTime").textContent="00:00"
-  document.getElementById("bigBar").style.width="0%"
-  return
-
- }
-
- let t=activeTimers[soonIndex]
-
- let total=t.tempo
- let remaining=Math.floor(total-(Date.now()-t.start)/1000)
-
- let m=Math.floor(remaining/60)
- let s=remaining%60
-
- document.getElementById("bigTimerName").textContent=config.timers[soonIndex].nome
- document.getElementById("bigTimerTime").textContent=
-  String(m).padStart(2,"0")+":"+
-  String(s).padStart(2,"0")
-
- document.getElementById("bigBar").style.width=
- ((total-remaining)/total*100)+"%"
-
-}
-
-
-/* HOTKEYS */
-
-document.addEventListener("keydown",(e)=>{
-
- let key=e.key.toLowerCase()
-
- localData.hotkeys.forEach((hk,i)=>{
-
-  if(key===hk){
-
-   document.querySelectorAll(".timer button")[i].click()
-
-  }
-
- })
-
-})
-
-
-/* OBS MODE */
-
-document.getElementById("obsBtn").onclick=()=>{
-
- document.body.classList.add("obsMode")
-
- document.getElementById("exitObsBtn").classList.remove("hidden")
-
-}
-
-document.getElementById("exitObsBtn").onclick=()=>{
-
- document.body.classList.remove("obsMode")
-
- document.getElementById("exitObsBtn").classList.add("hidden")
-
-}
-
-
-/* CONFIG */
-
-document.getElementById("configBtn").onclick=()=>{
-
- let panel=document.getElementById("configPanel")
- panel.classList.toggle("hidden")
-
- renderConfig()
-
-}
-
-
-function renderConfig(){
-
- let div=document.getElementById("configTimers")
- div.innerHTML=""
-
- config.timers.forEach((t,i)=>{
-
-  let row=document.createElement("div")
-
-  let nome=document.createElement("input")
-  nome.value=t.nome
-
-  let tempo=document.createElement("input")
-  tempo.value=t.tempo
-
-  row.append(nome,tempo)
-
-  div.appendChild(row)
-
- })
-
-}
-
-
-document.getElementById("saveConfig").onclick=()=>{
-
- let rows=document.querySelectorAll("#configTimers div")
-
- rows.forEach((row,i)=>{
-
-  let inputs=row.querySelectorAll("input")
-
-  config.timers[i].nome=inputs[0].value
-  config.timers[i].tempo=parseFloat(inputs[1].value)
-
- })
-
- set(ref(db,"config/timers"),config.timers)
-
- alert("Configuração salva")
-
-}
-
-
-/* LOAD CONFIG */
-
-function loadConfig(){
-
- const configRef=ref(db,"config/timers")
-
- onValue(configRef,(snapshot)=>{
-
-  const data=snapshot.val()
-
-  if(data){
-   config.timers=data
-  }
-
-  createTimers()
-  syncTimers()
-
- })
-
-}
-
-
-/* INIT */
-
-loadConfig()
