@@ -479,16 +479,18 @@ function renderBossConfig(){
   del.textContent="❌"
   del.className="deleteBoss"
 
-  del.onclick=()=>{
+del.onclick=(e)=>{
 
-   if(config.bosses.length<=1){
-    alert("Deve existir pelo menos 1 boss.")
-    return
-   }
+ e.stopPropagation()
 
-   deleteBoss(i)
+ if(config.bosses.length<=1){
+  alert("Deve existir pelo menos 1 boss.")
+  return
+ }
 
-  }
+ deleteBoss(i)
+
+}
 
   row.append(nome,tempo,del)
 
@@ -541,7 +543,8 @@ document.getElementById("addBoss").onclick=()=>{
 SAVE CONFIG
 ========================= */
 
-document.getElementById("saveConfig").onclick=()=>{
+document.getElementById("saveConfig").onclick=(e)=>{
+ e.stopPropagation()
 
  let rows=document.querySelectorAll("#bossConfig div")
 
