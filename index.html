@@ -4,7 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-<title>TimerTracker Dashboard</title>
+<title>TimerTracker</title>
 
 <link rel="stylesheet" href="style.css">
 
@@ -12,36 +12,42 @@
 
 <body>
 
+<div class="topbar">
+
+<h1>TimerTracker</h1>
+
+<div class="topButtons">
+<button id="obsBtn">OBS</button>
+<button id="exitObsBtn" class="hidden">Exit OBS</button>
+<button id="configBtn">⚙</button>
+</div>
+
+</div>
+
+
 <div class="dashboard">
 
-<!-- LEFT PANEL -->
+<!-- TIMER GRANDE -->
 
 <div class="leftPanel">
 
-<div class="mainTimer">
+<div id="bigTimer">
 
-<div id="bigTimer">00:00</div>
-<div id="bigLabel">No Timer Running</div>
+<div id="bigTimerName">No Active Timer</div>
+<div id="bigTimerTime">00:00</div>
 
+<div class="bigProgress">
+<div id="bigBar"></div>
 </div>
 
 </div>
 
+</div>
 
-<!-- RIGHT PANEL -->
+
+<!-- TIMERS -->
 
 <div class="rightPanel">
-
-<div class="header">
-
-<h1>Timers</h1>
-
-<div>
-
-<button id="obsBtn">OBS</button>
-<button id="configBtn">⚙</button>
-
-</div>
 
 <div id="timers"></div>
 
@@ -50,17 +56,18 @@
 </div>
 
 
-<!-- CONFIG PANEL -->
+<!-- CONFIG -->
 
 <div id="configPanel" class="hidden">
 
-<h2>Configuração</h2>
+<h2>Configurações</h2>
 
 <div id="configTimers"></div>
 
 <button id="saveConfig">Salvar</button>
 
 </div>
+
 
 <script type="module" src="app.js"></script>
 
