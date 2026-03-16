@@ -27,13 +27,9 @@ let localData = JSON.parse(localStorage.getItem("timertracker")) || {
 };
 
 let config = {
- timers:[
-  {nome:"Timer 1",tempo:8},
-  {nome:"Timer 2",tempo:30},
-  {nome:"Timer 3",tempo:15},
-  {nome:"Timer 4",tempo:60}
- ]
-};
+ timers:[],
+ bosses:[]
+}
 
 let intervals=[null,null,null,null]
 
@@ -97,6 +93,56 @@ function loadConfig(){
 }
 
 /* =========================
+LoadBoss
+========================= */
+
+function loadBosses(){
+
+ const bossRef = ref(db,"config/bosses")
+
+ onValue(bossRef,(snapshot)=>{
+
+  const data = snapshot.val()
+
+  if(!data) return
+
+  config.bosses = data
+
+  updateBossDropdowns()
+
+ })
+
+}
+
+/* =========================
+Render Boss
+========================= */
+
+function renderBossConfig(){
+
+ let div=document.getElementById("bossConfig")
+ div.innerHTML=""
+
+ config.bosses.forEach((b,i)=>{
+
+  let row=document.createElement("div")
+
+  let nome=document.createElement("input")
+  nome.value=b.nome
+
+  let tempo=document.createElement("input")
+  tempo.value=b.tempo
+  tempo.style.width="60px"
+
+  row.append(nome,tempo)
+
+  div.appendChild(row)
+
+ })
+
+}
+
+/* =========================
 CREATE UI
 ========================= */
 
@@ -110,8 +156,28 @@ function createTimers(){
   let div=document.createElement("div")
   div.className="timer"
 
-  let name=document.createElement("span")
-  name.textContent=t.nome
+let select=document.createElement("select")
+
+config.bosses.forEach((boss,i)=>{
+
+ let option=document.createElement("option")
+
+ option.value=i
+ option.textContent=boss.nome
+
+ select.appendChild(option)
+
+})
+
+select.value = t.bossId || 0
+
+select.onchange = ()=>{
+
+ config.timers[i].bossId = parseInt(select.value)
+
+ saveGlobal()
+
+}
 
   let label=document.createElement("span")
   label.textContent="00:00"
@@ -133,7 +199,7 @@ function createTimers(){
 
   btn.onclick=()=>toggleTimer(i)
 
-  div.append(name,label,progress,btn)
+  div.append(select,label,progress,btn)
 
   container.appendChild(div)
 
@@ -161,7 +227,9 @@ START TIMER
 
 function startTimer(i){
 
- let total=config.timers[i].tempo*60
+ let bossId = config.timers[i].bossId
+
+let total = config.bosses[bossId].tempo * 60
 
  set(ref(db,"timers/"+i),{
   start:Date.now(),
@@ -393,7 +461,23 @@ function renderConfig(){
 }
 
 document.getElementById("saveConfig").onclick=()=>{
+ 
+let rows=document.querySelectorAll("#bossConfig div")
 
+config.bosses=[]
+
+rows.forEach((row)=>{
+
+ let inputs=row.querySelectorAll("input")
+
+ config.bosses.push({
+  nome:inputs[0].value,
+  tempo:parseFloat(inputs[1].value)
+ })
+
+})
+
+set(ref(db,"config/bosses"),config.bosses)
  let rows=document.querySelectorAll("#configTimers div")
 
  rows.forEach((row,i)=>{
@@ -404,7 +488,7 @@ document.getElementById("saveConfig").onclick=()=>{
   config.timers[i].tempo=parseFloat(inputs[1].value)
 
   localData.hotkeys[i]=inputs[2].value.toLowerCase()
-
+  
  })
 
  saveLocal()
@@ -522,9 +606,39 @@ document.addEventListener("click",(e)=>{
 })
 
 /* =========================
+UpdateBoss
+========================= */
+
+function updateBossDropdowns(){
+
+ document.querySelectorAll(".timer select").forEach((select)=>{
+
+  let current = select.value
+
+  select.innerHTML=""
+
+  config.bosses.forEach((b,i)=>{
+
+   let opt=document.createElement("option")
+
+   opt.value=i
+   opt.textContent=b.nome
+
+   select.appendChild(opt)
+
+  })
+
+  select.value=current
+
+ })
+
+}
+
+/* =========================
 INIT
 ========================= */
 
 createTimers()
 loadConfig()
 syncTimers()
+loadBosses()
