@@ -179,3 +179,16 @@ z-index:10;
 animation:blinkTimer 1s infinite;
 
 }
+
+#configPanel{
+
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:#1b1b1f;
+padding:30px;
+border-radius:8px;
+z-index:10;
+
+}
