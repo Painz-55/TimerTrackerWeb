@@ -215,3 +215,20 @@ cursor:pointer;
 color:#ff4444;
 
 }
+
+
+.deleteBoss{
+
+background:none;
+border:none;
+color:#ff4444;
+cursor:pointer;
+font-size:16px;
+
+}
+
+.deleteBoss:hover{
+
+color:#ff0000;
+
+}
