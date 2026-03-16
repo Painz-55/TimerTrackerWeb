@@ -72,17 +72,20 @@ function loadConfig(){
 
   config.timers=data
 
-  const timerNames=document.querySelectorAll(".timer span:first-child")
+  const currentTimers=document.querySelectorAll(".timer")
 
-  if(timerNames.length){
+  if(currentTimers.length !== config.timers.length){
+
+   createTimers()
+   syncTimers()
+
+  }else{
+
+   const timerNames=document.querySelectorAll(".timer span:first-child")
 
    config.timers.forEach((t,i)=>{
     if(timerNames[i]) timerNames[i].textContent=t.nome
    })
-
-  }else{
-
-   createTimers()
 
   }
 
