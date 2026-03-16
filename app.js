@@ -1,75 +1,158 @@
-<!DOCTYPE html>
-<html>
+body{
 
-<head>
+background:#0f0f12;
+color:white;
+font-family:Arial;
+margin:0;
 
-<meta charset="UTF-8">
-<title>TimerTracker</title>
+}
 
-<link rel="stylesheet" href="style.css">
+.dashboard{
 
-</head>
+display:flex;
+height:100vh;
 
-<body>
+}
 
-<div class="topbar">
+/* LEFT */
 
-<h1>TimerTracker</h1>
+.leftPanel{
 
-<div class="topButtons">
-<button id="obsBtn">OBS</button>
-<button id="exitObsBtn" class="hidden">Exit OBS</button>
-<button id="configBtn">⚙</button>
-</div>
+width:40%;
+background:#111;
+display:flex;
+align-items:center;
+justify-content:center;
 
-</div>
+}
 
+.mainTimer{
 
-<div class="dashboard">
+text-align:center;
 
-<!-- TIMER GRANDE -->
+}
 
-<div class="leftPanel">
+#bigTimer{
 
-<div id="bigTimer">
+font-size:140px;
+font-weight:bold;
+color:#ff4c4c;
 
-<div id="bigTimerName">No Active Timer</div>
-<div id="bigTimerTime">00:00</div>
+}
 
-<div class="bigProgress">
-<div id="bigBar"></div>
-</div>
+#bigLabel{
 
-</div>
+font-size:22px;
+opacity:.7;
 
-</div>
+}
 
+/* RIGHT */
 
-<!-- TIMERS -->
+.rightPanel{
 
-<div class="rightPanel">
+flex:1;
+padding:30px;
+overflow:auto;
 
-<div id="timers"></div>
+}
 
-</div>
+.header{
 
-</div>
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
 
+}
 
-<!-- CONFIG -->
+.timer{
 
-<div id="configPanel" class="hidden">
+background:#1b1b1f;
+padding:20px;
+border-radius:8px;
+margin-bottom:15px;
 
-<h2>Configurações</h2>
+display:flex;
+align-items:center;
+gap:15px;
 
-<div id="configTimers"></div>
+}
 
-<button id="saveConfig">Salvar</button>
+.timer span:first-child{
 
-</div>
+width:150px;
+font-size:18px;
 
+}
 
-<script type="module" src="app.js"></script>
+.timer span:nth-child(2){
 
-</body>
-</html>
+width:70px;
+font-size:18px;
+
+}
+
+.progress{
+
+flex:1;
+height:8px;
+background:#333;
+border-radius:5px;
+overflow:hidden;
+
+}
+
+.bar{
+
+height:100%;
+background:#ff4c4c;
+width:0%;
+
+}
+
+button{
+
+background:#ff4c4c;
+border:none;
+color:white;
+padding:8px 14px;
+border-radius:4px;
+cursor:pointer;
+
+}
+
+button:hover{
+
+background:#ff6b6b;
+
+}
+
+/* CONFIG */
+
+#configPanel{
+
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:#1b1b1f;
+padding:30px;
+border-radius:8px;
+
+}
+
+.hidden{
+
+display:none;
+
+}
+
+input{
+
+background:#111;
+border:1px solid #444;
+color:white;
+padding:5px;
+
+}
