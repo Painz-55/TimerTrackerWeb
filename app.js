@@ -19,12 +19,16 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 /* =========================
-LOCAL DATA
+LOCAL DATA (HOTKEYS)
 ========================= */
 
 let localData = JSON.parse(localStorage.getItem("timertracker")) || {
  hotkeys:["f5","f6","f7","f8"]
 };
+
+/* =========================
+GLOBAL CONFIG
+========================= */
 
 let config = {
  timers:[
@@ -35,17 +39,14 @@ let config = {
  ]
 };
 
-let intervals=[null,null,null,null]
-
-/* timers ativos */
-let activeTimers={}
+let intervals=[null,null,null,null];
 
 /* =========================
 SAVE LOCAL
 ========================= */
 
 function saveLocal(){
- localStorage.setItem("timertracker",JSON.stringify(localData))
+ localStorage.setItem("timertracker",JSON.stringify(localData));
 }
 
 /* =========================
@@ -53,7 +54,7 @@ SAVE GLOBAL
 ========================= */
 
 function saveGlobal(){
- set(ref(db,"config/timers"),config.timers)
+ set(ref(db,"config/timers"),config.timers);
 }
 
 /* =========================
@@ -62,31 +63,19 @@ LOAD CONFIG
 
 function loadConfig(){
 
- const configRef = ref(db,"config/timers")
+ const configRef = ref(db,"config/timers");
 
  onValue(configRef,(snapshot)=>{
 
-  const data=snapshot.val()
+  const data=snapshot.val();
 
-  if(!data) return
+  if(!data) return;
 
-  config.timers=data
+  config.timers=data;
 
-  const timerNames=document.querySelectorAll(".timer span:first-child")
+  createTimers();
 
-  if(timerNames.length){
-
-   config.timers.forEach((t,i)=>{
-    if(timerNames[i]) timerNames[i].textContent=t.nome
-   })
-
-  }else{
-
-   createTimers()
-
-  }
-
- })
+ });
 
 }
 
@@ -96,38 +85,38 @@ CREATE UI
 
 function createTimers(){
 
- let container=document.getElementById("timers")
- container.innerHTML=""
+ let container=document.getElementById("timers");
+ container.innerHTML="";
 
  config.timers.forEach((t,i)=>{
 
-  let div=document.createElement("div")
-  div.className="timer"
+  let div=document.createElement("div");
+  div.className="timer";
 
-  let name=document.createElement("span")
-  name.textContent=t.nome
+  let name=document.createElement("span");
+  name.textContent=t.nome;
 
-  let label=document.createElement("span")
-  label.textContent="00:00"
+  let label=document.createElement("span");
+  label.textContent="00:00";
 
-  let progress=document.createElement("div")
-  progress.className="progress"
+  let progress=document.createElement("div");
+  progress.className="progress";
 
-  let bar=document.createElement("div")
-  bar.className="bar"
+  let bar=document.createElement("div");
+  bar.className="bar";
 
-  progress.appendChild(bar)
+  progress.appendChild(bar);
 
-  let btn=document.createElement("button")
-  btn.textContent="Start"
+  let btn=document.createElement("button");
+  btn.textContent="Start";
 
-  btn.onclick=()=>toggleTimer(i)
+  btn.onclick=()=>toggleTimer(i);
 
-  div.append(name,label,progress,btn)
+  div.append(name,label,progress,btn);
 
-  container.appendChild(div)
+  container.appendChild(div);
 
- })
+ });
 
 }
 
@@ -138,9 +127,9 @@ START / STOP
 function toggleTimer(i){
 
  if(intervals[i]){
-  stopTimer(i)
+  stopTimer(i);
  }else{
-  startTimer(i)
+  startTimer(i);
  }
 
 }
@@ -151,12 +140,12 @@ START TIMER
 
 function startTimer(i){
 
- let total=config.timers[i].tempo*60
+ let total=config.timers[i].tempo*60;
 
  set(ref(db,"timers/"+i),{
   start:Date.now(),
   tempo:total
- })
+ });
 
 }
 
@@ -166,21 +155,19 @@ STOP TIMER
 
 function stopTimer(i){
 
- clearInterval(intervals[i])
- intervals[i]=null
+ clearInterval(intervals[i]);
+ intervals[i]=null;
 
- delete activeTimers[i]
- updateBigTimer()
+ let label=document.querySelectorAll(".timer span")[i*2+1];
+ let bar=document.querySelectorAll(".bar")[i];
+ let btn=document.querySelectorAll(".timer button")[i];
 
- let label=document.querySelectorAll(".timer span")[i*2+1]
- let bar=document.querySelectorAll(".bar")[i]
- let btn=document.querySelectorAll(".timer button")[i]
+ label.textContent="00:00";
+ bar.style.width="0%";
+ btn.textContent="Start";
 
- label.textContent="00:00"
- bar.style.width="0%"
- btn.textContent="Start"
-
- set(ref(db,"timers/"+i), null)
+ // remove timer global
+ set(ref(db,"timers/"+i), null);
 
 }
 
@@ -192,39 +179,34 @@ function syncTimers(){
 
  config.timers.forEach((t,i)=>{
 
-  const timerRef=ref(db,"timers/"+i)
+  const timerRef=ref(db,"timers/"+i);
 
   onValue(timerRef,(snapshot)=>{
 
-   const data=snapshot.val()
+   const data=snapshot.val();
 
-   const label=document.querySelectorAll(".timer span")[i*2+1]
-   const bar=document.querySelectorAll(".bar")[i]
-   const btn=document.querySelectorAll(".timer button")[i]
+   const label=document.querySelectorAll(".timer span")[i*2+1];
+   const bar=document.querySelectorAll(".bar")[i];
+   const btn=document.querySelectorAll(".timer button")[i];
 
    if(data===null){
 
-    clearInterval(intervals[i])
-    intervals[i]=null
+    clearInterval(intervals[i]);
+    intervals[i]=null;
 
-    delete activeTimers[i]
-    updateBigTimer()
+    label.textContent="00:00";
+    bar.style.width="0%";
+    btn.textContent="Start";
 
-    if(label){
-     label.textContent="00:00"
-     bar.style.width="0%"
-     btn.textContent="Start"
-    }
-
-    return
+    return;
 
    }
 
-   runTimer(i,data)
+   runTimer(i,data);
 
-  })
+  });
 
- })
+ });
 
 }
 
@@ -234,92 +216,37 @@ RUN TIMER
 
 function runTimer(i,data){
 
- let label=document.querySelectorAll(".timer span")[i*2+1]
- let bar=document.querySelectorAll(".bar")[i]
- let btn=document.querySelectorAll(".timer button")[i]
+ let label=document.querySelectorAll(".timer span")[i*2+1];
+ let bar=document.querySelectorAll(".bar")[i];
+ let btn=document.querySelectorAll(".timer button")[i];
 
- let total=data.tempo
+ let total=data.tempo;
 
- clearInterval(intervals[i])
+ clearInterval(intervals[i]);
 
  intervals[i]=setInterval(()=>{
 
-  let elapsed=(Date.now()-data.start)/1000
-  let remaining=Math.floor(total-elapsed)
+  let elapsed=(Date.now()-data.start)/1000;
+  let remaining=Math.floor(total-elapsed);
 
-  if(remaining<0) remaining=0
+  if(remaining<0) remaining=0;
 
-  let m=Math.floor(remaining/60)
-  let s=remaining%60
+  let m=Math.floor(remaining/60);
+  let s=remaining%60;
 
   label.textContent=
    String(m).padStart(2,"0")+":"+
-   String(s).padStart(2,"0")
+   String(s).padStart(2,"0");
 
-  bar.style.width=((total-remaining)/total*100)+"%"
+  bar.style.width=((total-remaining)/total*100)+"%";
 
-  btn.textContent="Stop"
-
-  activeTimers[i]={
-   remaining:remaining,
-   label:config.timers[i].nome
-  }
-
-  updateBigTimer()
+  btn.textContent="Stop";
 
   if(remaining<=0){
-
-   delete activeTimers[i]
-   stopTimer(i)
-
+   stopTimer(i);
   }
 
- },1000)
-
-}
-
-/* =========================
-BIG TIMER LOGIC
-========================= */
-
-function updateBigTimer(){
-
- let keys=Object.keys(activeTimers)
-
- if(keys.length===0){
-
-  document.getElementById("bigTimer").textContent="00:00"
-  document.getElementById("bigLabel").textContent="No Timer Running"
-
-  return
-
- }
-
- let lowest=null
- let index=null
-
- keys.forEach(k=>{
-
-  if(lowest===null || activeTimers[k].remaining<lowest){
-
-   lowest=activeTimers[k].remaining
-   index=k
-
-  }
-
- })
-
- let remaining=activeTimers[index].remaining
-
- let m=Math.floor(remaining/60)
- let s=remaining%60
-
- document.getElementById("bigTimer").textContent=
-  String(m).padStart(2,"0")+":"+
-  String(s).padStart(2,"0")
-
- document.getElementById("bigLabel").textContent=
-  activeTimers[index].label
+ },1000);
 
 }
 
@@ -329,17 +256,17 @@ HOTKEYS
 
 document.addEventListener("keydown",(e)=>{
 
- let key=e.key.toLowerCase()
+ let key=e.key.toLowerCase();
 
  localData.hotkeys.forEach((hk,i)=>{
 
   if(key===hk){
-   document.querySelectorAll(".timer button")[i].click()
+   document.querySelectorAll(".timer button")[i].click();
   }
 
- })
+ });
 
-})
+});
 
 /* =========================
 CONFIG PANEL
@@ -347,80 +274,66 @@ CONFIG PANEL
 
 document.getElementById("configBtn").onclick=()=>{
 
- let panel=document.getElementById("configPanel")
- panel.classList.toggle("hidden")
+ let panel=document.getElementById("configPanel");
+ panel.classList.toggle("hidden");
 
- renderConfig()
+ renderConfig();
 
-}
+};
 
 function renderConfig(){
 
- let div=document.getElementById("configTimers")
- div.innerHTML=""
+ let div=document.getElementById("configTimers");
+ div.innerHTML="";
 
  config.timers.forEach((t,i)=>{
 
-  let row=document.createElement("div")
+  let row=document.createElement("div");
 
-  let nome=document.createElement("input")
-  nome.value=t.nome
+  let nome=document.createElement("input");
+  nome.value=t.nome;
 
-  let tempo=document.createElement("input")
-  tempo.value=t.tempo
-  tempo.style.width="60px"
+  let tempo=document.createElement("input");
+  tempo.value=t.tempo;
+  tempo.style.width="60px";
 
-  let key=document.createElement("input")
-  key.value=localData.hotkeys[i]
-  key.style.width="60px"
+  let key=document.createElement("input");
+  key.value=localData.hotkeys[i];
+  key.style.width="60px";
 
-  row.append(nome,tempo,key)
+  row.append(nome,tempo,key);
 
-  div.appendChild(row)
+  div.appendChild(row);
 
- })
+ });
 
 }
 
 document.getElementById("saveConfig").onclick=()=>{
 
- let rows=document.querySelectorAll("#configTimers div")
+ let rows=document.querySelectorAll("#configTimers div");
 
  rows.forEach((row,i)=>{
 
-  let inputs=row.querySelectorAll("input")
+  let inputs=row.querySelectorAll("input");
 
-  config.timers[i].nome=inputs[0].value
-  config.timers[i].tempo=parseFloat(inputs[1].value)
+  config.timers[i].nome=inputs[0].value;
+  config.timers[i].tempo=parseFloat(inputs[1].value);
+  localData.hotkeys[i]=inputs[2].value.toLowerCase();
 
-  localData.hotkeys[i]=inputs[2].value.toLowerCase()
+ });
 
- })
+ saveLocal();
+ saveGlobal();
 
- saveLocal()
- saveGlobal()
+ alert("Configuração salva");
 
- alert("Configuração salva")
-
-}
-
-/* =========================
-OBS MODE
-========================= */
-
-document.getElementById("obsBtn").onclick=()=>{
-
- document.querySelector(".rightPanel").style.display="none"
- document.querySelector(".header").style.display="none"
-
- document.querySelector(".leftPanel").style.width="100%"
-
-}
+};
 
 /* =========================
 INIT
 ========================= */
 
-createTimers()
-loadConfig()
-syncTimers()
+createTimers();
+loadConfig();
+syncTimers();
