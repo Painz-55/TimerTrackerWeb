@@ -553,6 +553,25 @@ function updateBossDropdowns(){
 }
 
 /* =========================
+CLOSE CONFIG CLICK OUTSIDE
+========================= */
+
+document.addEventListener("click",(e)=>{
+
+ const panel=document.getElementById("configPanel")
+ const btn=document.getElementById("configBtn")
+
+ if(panel.classList.contains("hidden")) return
+
+ if(!panel.contains(e.target) && !btn.contains(e.target)){
+
+  panel.classList.add("hidden")
+
+ }
+
+})
+
+/* =========================
 INIT
 ========================= */
 
