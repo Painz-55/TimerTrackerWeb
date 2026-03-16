@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, set, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 /* =========================
 FIREBASE
@@ -19,6 +19,22 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+
+/* =========================
+SERVER TIME SYNC
+========================= */
+
+let serverOffset = 0
+
+const offsetRef = ref(db,".info/serverTimeOffset")
+
+onValue(offsetRef,(snap)=>{
+ serverOffset = snap.val() || 0
+})
+
+function serverNow(){
+ return Date.now() + serverOffset
+}
 
 /* =========================
 DATA
@@ -88,10 +104,6 @@ SAVE GLOBAL
 function saveGlobal(){
  set(ref(db,"config/timers"),config.timers)
 }
-
-/* =========================
-SAVE BOSSES
-========================= */
 
 function saveConfig(){
  set(ref(db,"config/bosses"),config.bosses)
@@ -225,8 +237,8 @@ function startTimer(i){
 
  set(ref(db,"timers/"+i),{
 
-  start:Date.now(),
-  tempo:total
+  start: serverTimestamp(),
+  tempo: total
 
  })
 
@@ -239,7 +251,6 @@ STOP TIMER
 function stopTimer(i){
 
  clearInterval(intervals[i])
-
  intervals[i]=null
 
  delete activeTimers[i]
@@ -329,7 +340,7 @@ function runTimer(i,data){
 
  intervals[i]=setInterval(()=>{
 
-  let elapsed=(Date.now()-data.start)/1000
+  let elapsed=(serverNow()-data.start)/1000
   let remaining=Math.floor(total-elapsed)
 
   if(remaining<0) remaining=0
@@ -355,9 +366,7 @@ function runTimer(i,data){
   updateBigTimer()
 
  if(remaining<=0){
-
   triggerTimerFinished(i)
-
  }
 
  },1000)
@@ -444,187 +453,6 @@ function playAlarm(){
 }
 
 /* =========================
-CONFIG PANEL
-========================= */
-
-document.getElementById("configBtn").onclick=()=>{
-
- let panel=document.getElementById("configPanel")
- panel.classList.toggle("hidden")
-
-}
-
-/* =========================
-RENDER BOSS CONFIG
-========================= */
-
-function renderBossConfig(){
-
- let div=document.getElementById("bossConfig")
- div.innerHTML=""
-
- config.bosses.forEach((b,i)=>{
-
-  let row=document.createElement("div")
-  row.className="bossRow"
-
-  let nome=document.createElement("input")
-  nome.value=b.nome
-
-  let tempo=document.createElement("input")
-  tempo.value=b.tempo
-  tempo.style.width="60px"
-
-  let del=document.createElement("button")
-  del.textContent="❌"
-  del.className="deleteBoss"
-
-del.onclick=(e)=>{
-
- e.stopPropagation()
-
- if(config.bosses.length<=1){
-  alert("Deve existir pelo menos 1 boss.")
-  return
- }
-
- deleteBoss(i)
-
-}
-
-  row.append(nome,tempo,del)
-
-  div.appendChild(row)
-
- })
-
-}
-
-/* =========================
-DELETE BOSS
-========================= */
-
-function deleteBoss(i){
-
- config.bosses.splice(i,1)
-
- config.timers.forEach(t=>{
-  if(t.bossId>=config.bosses.length){
-   t.bossId=0
-  }
- })
-
- saveConfig()
- saveGlobal()
-
- renderBossConfig()
- createTimers()
-
-}
-
-/* =========================
-ADD BOSS
-========================= */
-
-document.getElementById("addBoss").onclick=()=>{
-
- config.bosses.push({
-
-  nome:"Novo Boss",
-  tempo:30
-
- })
-
- renderBossConfig()
-
-}
-
-/* =========================
-SAVE CONFIG
-========================= */
-
-document.getElementById("saveConfig").onclick=(e)=>{
- e.stopPropagation()
-
- let rows=document.querySelectorAll("#bossConfig div")
-
- config.bosses=[]
-
- rows.forEach((row)=>{
-
-  let inputs=row.querySelectorAll("input")
-
-  config.bosses.push({
-
-   nome:inputs[0].value,
-   tempo:parseFloat(inputs[1].value)
-
-  })
-
- })
-
- saveConfig()
-
- document.getElementById("configPanel").classList.add("hidden")
-
-}
-
-/* =========================
-UPDATE DROPDOWNS
-========================= */
-
-function updateBossDropdowns(){
-
- document.querySelectorAll(".timer select").forEach((select)=>{
-
-  let current=select.value
-
-  select.innerHTML=""
-
-  config.bosses.forEach((b,i)=>{
-
-   let opt=document.createElement("option")
-
-   opt.value=i
-   opt.textContent=b.nome
-
-   select.appendChild(opt)
-
-  })
-
-  select.value=current
-
- })
-
-}
-
-/* =========================
-CLOSE CONFIG CLICK OUTSIDE
-========================= */
-
-document.addEventListener("click",(e)=>{
-
- const panel=document.getElementById("configPanel")
- const btn=document.getElementById("configBtn")
-
- if(panel.classList.contains("hidden")) return
-
- if(!panel.contains(e.target) && !btn.contains(e.target)){
-
-  panel.classList.add("hidden")
-
- }
-
-})
-
-document.getElementById("closeConfig").onclick=()=>{
-
- document.getElementById("configPanel").classList.add("hidden")
-
-}
-
-
-/* =========================
 OBS MODE
 ========================= */
 
@@ -644,16 +472,12 @@ obsBtn.onclick = ()=>{
 
 }
 
-/* =========================
-EXIT OBS MODE
-========================= */
-
 exitObs.onclick = ()=>{
 
  const rightPanel = document.querySelector(".rightPanel")
  const leftPanel = document.querySelector(".leftPanel")
 
- rightPanel.style.display = "block"
+ rightPanel.style.display = ""
  leftPanel.style.width = "40%"
 
  obsBtn.style.display = "inline-block"
