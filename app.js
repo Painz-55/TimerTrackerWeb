@@ -31,6 +31,7 @@ let config={
 
 let intervals=[]
 let activeTimers={}
+let timerListeners=[]
 
 /* =========================
 LOAD BOSSES
