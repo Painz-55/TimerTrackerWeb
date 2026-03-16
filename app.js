@@ -465,8 +465,7 @@ TIMER FINISHED
 
 function triggerTimerFinished(i){
 
-clearInterval(intervals[i])
- intervals[i]=null
+ clearInterval(intervals[i])
 
  let timerDiv=document.querySelectorAll(".timer")[i]
 
