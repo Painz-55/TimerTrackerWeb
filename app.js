@@ -400,7 +400,7 @@ document.getElementById("saveConfig").onclick=()=>{
  saveLocal()
  saveGlobal()
 
- alert("Configuração salva")
+ document.getElementById("configPanel").classList.add("hidden")
 
 }
 
@@ -408,14 +408,51 @@ document.getElementById("saveConfig").onclick=()=>{
 OBS MODE
 ========================= */
 
+let obsMode=false
+
 document.getElementById("obsBtn").onclick=()=>{
+
+ obsMode=true
 
  document.querySelector(".rightPanel").style.display="none"
  document.querySelector(".header").style.display="none"
 
  document.querySelector(".leftPanel").style.width="100%"
 
+ document.getElementById("exitObs").classList.remove("hidden")
+
 }
+
+document.getElementById("exitObs").onclick=()=>{
+
+ obsMode=false
+
+ document.querySelector(".rightPanel").style.display="block"
+ document.querySelector(".header").style.display="flex"
+
+ document.querySelector(".leftPanel").style.width="40%"
+
+ document.getElementById("exitObs").classList.add("hidden")
+
+}
+
+/* =========================
+Fechar Config Clickando Fora
+========================= */
+
+document.addEventListener("click",(e)=>{
+
+ const panel=document.getElementById("configPanel")
+
+ if(panel.classList.contains("hidden")) return
+
+ if(!panel.contains(e.target) && e.target.id !== "configBtn"){
+
+  panel.classList.add("hidden")
+
+ }
+
+})
 
 /* =========================
 INIT
