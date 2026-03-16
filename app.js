@@ -86,9 +86,15 @@ SAVE GLOBAL
 ========================= */
 
 function saveGlobal(){
-
  set(ref(db,"config/timers"),config.timers)
+}
 
+/* =========================
+SAVE BOSSES
+========================= */
+
+function saveConfig(){
+ set(ref(db,"config/bosses"),config.bosses)
 }
 
 /* =========================
@@ -262,7 +268,6 @@ SYNC TIMERS
 
 function syncTimers(){
 
- // remover listeners antigos
  timerListeners.forEach(unsub=>{
   if(unsub) unsub()
  })
@@ -465,19 +470,14 @@ function renderBossConfig(){
 
   let nome=document.createElement("input")
   nome.value=b.nome
-  nome.dataset.index=i
-  nome.className="bossName"
 
   let tempo=document.createElement("input")
   tempo.value=b.tempo
   tempo.style.width="60px"
-  tempo.dataset.index=i
-  tempo.className="bossTempo"
 
   let del=document.createElement("button")
   del.textContent="❌"
   del.className="deleteBoss"
-  del.dataset.index=i
 
   del.onclick=()=>{
 
@@ -486,13 +486,7 @@ function renderBossConfig(){
     return
    }
 
-   config.bosses.splice(i,1)
-
-   saveConfig()
-
-   renderBossConfig()
-
-   createTimers()
+   deleteBoss(i)
 
   }
 
@@ -504,26 +498,24 @@ function renderBossConfig(){
 
 }
 
-document.addEventListener("click",(e)=>{
-
- if(e.target.classList.contains("deleteBoss")){
-
-  const index=parseInt(e.target.dataset.index)
-
-  deleteBoss(index)
-
- }
-
-})
+/* =========================
+DELETE BOSS
+========================= */
 
 function deleteBoss(i){
 
  config.bosses.splice(i,1)
 
+ config.timers.forEach(t=>{
+  if(t.bossId>=config.bosses.length){
+   t.bossId=0
+  }
+ })
+
  saveConfig()
+ saveGlobal()
 
  renderBossConfig()
-
  createTimers()
 
 }
@@ -568,7 +560,7 @@ document.getElementById("saveConfig").onclick=()=>{
 
  })
 
- set(ref(db,"config/bosses"),config.bosses)
+ saveConfig()
 
  document.getElementById("configPanel").classList.add("hidden")
 
