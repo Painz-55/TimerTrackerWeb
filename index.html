@@ -4,21 +4,54 @@
 <head>
 
 <meta charset="UTF-8">
-<title>TimerTracker</title>
+<title>TimerTracker Dashboard</title>
+
 <link rel="stylesheet" href="style.css">
 
 </head>
 
 <body>
 
-<h1>TIMERTRACKER</h1>
+<div class="dashboard">
+
+<!-- LEFT PANEL -->
+
+<div class="leftPanel">
+
+<div class="mainTimer">
+
+<div id="bigTimer">00:00</div>
+<div id="bigLabel">No Timer Running</div>
+
+</div>
+
+</div>
+
+
+<!-- RIGHT PANEL -->
+
+<div class="rightPanel">
+
+<div class="header">
+
+<h1>Timers</h1>
 
 <button id="configBtn">⚙</button>
 
+</div>
+
 <div id="timers"></div>
 
+</div>
+
+</div>
+
+
+<!-- CONFIG PANEL -->
+
 <div id="configPanel" class="hidden">
-<h2>Configurações</h2>
+
+<h2>Configuração</h2>
 
 <div id="configTimers"></div>
 
@@ -26,7 +59,6 @@
 
 </div>
 
-<!-- Firebase + App -->
 <script type="module" src="app.js"></script>
 
 </body>
