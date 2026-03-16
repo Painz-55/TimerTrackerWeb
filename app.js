@@ -453,6 +453,8 @@ if(remaining<=0){
 
  triggerTimerFinished(i)
 
+}
+
 },1000)
 
 }
