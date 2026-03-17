@@ -6,15 +6,14 @@ FIREBASE
 ========================= */
 
 const firebaseConfig = {
-
- apiKey: "AIzaSyAdCJ_Ux1YrjQdxSgutu_SvqTQTNIDVLUs",
- authDomain: "timertracker-77df3.firebaseapp.com",
- databaseURL: "https://timertracker-77df3-default-rtdb.firebaseio.com",
- projectId: "timertracker-77df3",
- storageBucket: "timertracker-77df3.firebasestorage.app",
- messagingSenderId: "1071640359296",
- appId: "1:1071640359296:web:c02cd908aca9a8547d1165"
-
+ 
+  apiKey: "AIzaSyCG0fmaANlxU4CIiYaXGBIKtXUbGrN7kFM",
+  authDomain: "timetracker-9b206.firebaseapp.com",
+  projectId: "timetracker-9b206",
+  storageBucket: "timetracker-9b206.firebasestorage.app",
+  messagingSenderId: "81072094883",
+  appId: "1:81072094883:web:9d57f7a2010b24a1b58916"
+ 
 };
 
 const app = initializeApp(firebaseConfig);
